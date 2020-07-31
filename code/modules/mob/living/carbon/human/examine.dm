@@ -163,8 +163,8 @@
 				msg += "<B>[t_He] [t_has] \a [icon2html(I, user)] [I] stuck to [t_his] [BP.name]!</B>\n"
 			else
 				msg += "<B>[t_He] [t_has] \a [icon2html(I, user)] [I] embedded in [t_his] [BP.name]!</B>\n"
-			for(var/datum/wound/W in BP.wounds)
-				msg += "[W.get_examine_description(user)]\n"
+		for(var/datum/wound/W in BP.wounds)
+			msg += "[W.get_examine_description(user)]\n"
 
 	for(var/X in disabled)
 		var/obj/item/bodypart/BP = X
@@ -249,7 +249,7 @@
 			msg += "[t_He] look[p_s()] extremely disgusted.\n"
 
 	var/apparent_blood_volume = blood_volume
-	if(skin_tone == "albino")
+	if(dna.species.use_skintones && skin_tone == "albino")
 		apparent_blood_volume -= 150 // enough to knock you down one tier
 	switch(apparent_blood_volume)
 		if(BLOOD_VOLUME_OKAY to BLOOD_VOLUME_SAFE)
