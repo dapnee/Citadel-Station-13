@@ -443,7 +443,7 @@
 	// Check area validity.
 	// Reject space, player-created areas, and non-station z-levels.
 	var/area/A = get_base_area(target)
-	if(!A || (!is_station_level(A.z)) || !A.valid_territory)
+	if(!A || (!is_station_level(A.z)) || !(A.area_flags & VALID_TERRITORY))
 		to_chat(user, "<span class='warning'>[A] is unsuitable for tagging.</span>")
 		return FALSE
 
@@ -649,6 +649,9 @@
 	pre_noise = TRUE
 	post_noise = FALSE
 
+	var/stun_delay = 0 // how long it takes for you to be able to stun someone with the spraycan again
+	var/last_stun_time = 0
+
 /obj/item/toy/crayon/spraycan/isValidSurface(surface)
 	return (istype(surface, /turf/open/floor) || istype(surface, /turf/closed/wall))
 
@@ -716,7 +719,8 @@
 		if(C.client)
 			C.blur_eyes(3)
 			C.blind_eyes(1)
-		if(C.get_eye_protection() <= 0) // no eye protection? ARGH IT BURNS.
+		if(C.get_eye_protection() <= 0 && (last_stun_time + stun_delay) <= world.time) // no eye protection? ARGH IT BURNS.
+			last_stun_time = world.time
 			C.confused = max(C.confused, 3)
 			C.DefaultCombatKnockdown(60)
 		if(ishuman(C) && actually_paints)
@@ -735,7 +739,11 @@
 	if(isobj(target))
 		if(actually_paints)
 			var/list/hsl = rgb2hsl(hex2num(copytext(paint_color,2,4)),hex2num(copytext(paint_color,4,6)),hex2num(copytext(paint_color,6,8)))
-			if(hsl[3] < 0.25 && !istype(target, /obj/structure/window) && !istype(target, /obj/effect/decal/cleanable/crayon)) //Colors too dark are rejected
+			var/static/whitelisted = typecacheof(list(/obj/structure/window,
+										/obj/effect/decal/cleanable/crayon,
+										/obj/machinery/door/window)
+									)
+			if(hsl[3] < 0.25 && !whitelisted[target]) //Colors too dark are rejected
 				to_chat(usr, "<span class='warning'>A color that dark on an object like this? Surely not...</span>")
 				return FALSE
 
@@ -767,6 +775,7 @@
 	name = "cyborg spraycan"
 	desc = "A metallic container containing shiny synthesised paint."
 	charges = -1
+	stun_delay = 5 SECONDS
 
 /obj/item/toy/crayon/spraycan/borg/draw_on(atom/target,mob/user,proximity, params)
 	var/diff = ..()

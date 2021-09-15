@@ -22,6 +22,8 @@
 
 //returns the damage value of the attack after processing the obj's various armor protections
 /obj/proc/run_obj_armor(damage_amount, damage_type, damage_flag = 0, attack_dir, armour_penetration = 0)
+	if(damage_flag == MELEE && damage_amount < damage_deflection)
+		return 0
 	switch(damage_type)
 		if(BRUTE)
 		if(BURN)
@@ -71,6 +73,19 @@
 		if(3)
 			take_damage(rand(10, 90), BRUTE, "bomb", 0)
 
+/obj/wave_ex_act(power, datum/wave_explosion/explosion, dir)
+	if(resistance_flags & INDESTRUCTIBLE)
+		return power
+	. = ..()
+	if(explosion.source == src)
+		obj_integrity = 0
+		qdel(src)
+		return
+	take_damage(wave_explosion_damage(power, explosion), BRUTE, "bomb", 0)
+
+/obj/proc/wave_explosion_damage(power, datum/wave_explosion/explosion)
+	return (explosion_flags & EXPLOSION_FLAG_HARD_OBSTACLE)? EXPLOSION_POWER_STANDARD_SCALE_HARD_OBSTACLE_DAMAGE(power, explosion.hard_obstacle_mod) : EXPLOSION_POWER_STANDARD_SCALE_OBJECT_DAMAGE(power, explosion.object_damage_mod)
+
 /obj/bullet_act(obj/item/projectile/P)
 	. = ..()
 	playsound(src, P.hitsound, 50, 1)
@@ -109,7 +124,7 @@
 		return
 	user.do_attack_animation(src)
 	. = take_damage(damage_amount, damage_type, damage_flag, sound_effect, get_dir(src, user), armor_penetration)
-	user.DelayNextAction()
+	user.DelayNextAction(CLICK_CD_MELEE)
 
 /obj/attack_alien(mob/living/carbon/alien/humanoid/user)
 	if(attack_generic(user, 60, BRUTE, "melee", 0))
@@ -143,10 +158,18 @@
 	var/amt = max(0, ((force - (move_resist * MOVE_FORCE_CRUSH_RATIO)) / (move_resist * MOVE_FORCE_CRUSH_RATIO)) * 10)
 	take_damage(amt, BRUTE)
 
+#define BLACKLISTED_OBJECTS list(/obj/machinery/power/apc, /obj/machinery/airalarm, /obj/machinery/power/smes, /obj/structure/cable)
+
 /obj/attack_slime(mob/living/simple_animal/slime/user)
 	if(!user.is_adult)
 		return
-	attack_generic(user, rand(10, 15), "melee", 1)
+	if(src.type in BLACKLISTED_OBJECTS)
+		return
+	if(istype(src, /obj/machinery/atmospherics))
+		return
+	attack_generic(user, rand(10, 15), BRUTE, "melee", 1)
+
+#undef BLACKLISTED_OBJECTS
 
 /obj/mech_melee_attack(obj/mecha/M)
 	M.do_attack_animation(src)
@@ -183,34 +206,22 @@ GLOBAL_DATUM_INIT(acid_overlay, /mutable_appearance, mutable_appearance('icons/e
 //the obj's reaction when touched by acid
 /obj/acid_act(acidpwr, acid_volume)
 	if(!(resistance_flags & UNACIDABLE) && acid_volume)
-
-		if(!acid_level)
-			SSacid.processing[src] = src
-			update_icon()
-		var/acid_cap = acidpwr * 300 //so we cannot use huge amounts of weak acids to do as well as strong acids.
-		if(acid_level < acid_cap)
-			acid_level = min(acid_level + acidpwr * acid_volume, acid_cap)
+		AddComponent(/datum/component/acid, acidpwr, acid_volume)
 		return 1
-
-//the proc called by the acid subsystem to process the acid that's on the obj
-/obj/proc/acid_processing()
-	. = 1
-	if(!(resistance_flags & ACID_PROOF))
-		for(var/armour_value in armor)
-			if(armour_value != "acid" && armour_value != "fire")
-				armor = armor.modifyAllRatings(0 - round(sqrt(acid_level)*0.1))
-		if(prob(33))
-			playsound(loc, 'sound/items/welder.ogg', 150, 1)
-		take_damage(min(1 + round(sqrt(acid_level)*0.3), 300), BURN, "acid", 0)
-
-	acid_level = max(acid_level - (5 + 3*round(sqrt(acid_level))), 0)
-	if(!acid_level)
-		return 0
 
 //called when the obj is destroyed by acid.
 /obj/proc/acid_melt()
-	SSacid.processing -= src
+	var/datum/component/acid/acid = GetComponent(/datum/component/acid)
+	if(acid)
+		acid.RemoveComponent()
 	deconstruct(FALSE)
+
+/obj/proc/acid_level()
+	var/datum/component/acid/acid = GetComponent(/datum/component/acid)
+	if(acid)
+		return acid.level
+	else
+		return 0
 
 //// FIRE
 

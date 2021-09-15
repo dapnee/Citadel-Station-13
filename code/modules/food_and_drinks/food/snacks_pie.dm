@@ -54,7 +54,7 @@
 		H.visible_message("<span class='warning'>[H] is creamed by [src]!</span>", "<span class='userdanger'>You've been creamed by [src]!</span>")
 		playsound(H, "desceration", 50, TRUE)
 		if(!H.is_mouth_covered())
-			reagents.trans_to(H,15) //Cream pie combat
+			reagents.trans_to(H, 15, log = "creampie hit") //Cream pie combat
 		if(!H.creamed) // one layer at a time
 			H.add_overlay(creamoverlay)
 			H.creamed = TRUE
@@ -171,8 +171,10 @@
 		name = "exceptional plump pie"
 		desc = "Microwave is taken by a fey mood! It has cooked an exceptional plump pie!"
 		bonus_reagents = list(/datum/reagent/consumable/nutriment = 1, /datum/reagent/medicine/omnizine = 5, /datum/reagent/consumable/nutriment/vitamin = 4)
+		foodtype += ANTITOXIC
 	if(fey)
 		reagents.add_reagent(/datum/reagent/medicine/omnizine, 5)
+		foodtype += ANTITOXIC
 
 
 /obj/item/reagent_containers/food/snacks/pie/xemeatpie

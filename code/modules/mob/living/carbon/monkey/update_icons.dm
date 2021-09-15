@@ -34,7 +34,7 @@
 			hair_hidden = 1
 	if(!hair_hidden)
 		if(!getorgan(/obj/item/organ/brain)) //Applies the debrained overlay if there is no brain
-			overlays_standing[HAIR_LAYER] = mutable_appearance('icons/mob/human_face.dmi', "debrained", -HAIR_LAYER)
+			overlays_standing[HAIR_LAYER] = mutable_appearance('icons/mob/human_parts.dmi', "debrained", -HAIR_LAYER)
 			apply_overlay(HAIR_LAYER)
 
 
@@ -51,7 +51,7 @@
 
 		overlays_standing[HANDCUFF_LAYER] = legcuffs
 		apply_overlay(LEGCUFF_LAYER)
-		throw_alert("legcuffed", /obj/screen/alert/restrained/legcuffed, new_master = legcuffed)
+		throw_alert("legcuffed", /atom/movable/screen/alert/restrained/legcuffed, new_master = legcuffed)
 
 //monkey HUD updates for items in our inventory
 

@@ -52,7 +52,7 @@
 
 /datum/crafting_recipe/armwraps
 	name = "Armwraps"
-	result = /obj/item/clothing/gloves/fingerless/pugilist
+	result = /obj/item/clothing/gloves/fingerless/pugilist/crafted
 	time = 60
 	tools = list(TOOL_WIRECUTTER)
 	reqs = list(/obj/item/stack/sheet/cloth = 4,
@@ -272,6 +272,16 @@
 	/obj/item/stack/sheet/plastic = 4)
 	time = 30
 	category = CAT_CLOTHING
+
+/datum/crafting_recipe/twinsheath
+	name = "Twin Sword Sheath"
+	result = /obj/item/storage/belt/sabre/twin
+	reqs = list(/obj/item/stack/sheet/mineral/wood = 3,
+				/obj/item/stack/sheet/leather = 8)
+	tools = list(TOOL_WIRECUTTER)
+	time = 70
+	category = CAT_CLOTHING
+
 
 /datum/crafting_recipe/durathread_reinforcement_kit
 	name = "Durathread Reinforcement Kit"

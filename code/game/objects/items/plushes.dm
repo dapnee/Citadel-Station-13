@@ -33,6 +33,8 @@
 	//--end of love :'(--
 
 	var/snowflake_id					//if we set from a config snowflake plushie.
+	/// wrapper, do not use, read only
+	var/__ADMIN_SET_TO_ID
 	var/can_random_spawn = TRUE			//if this is FALSE, don't spawn this for random plushies.
 
 /obj/item/toy/plush/random_snowflake/Initialize(mapload, set_snowflake_id)
@@ -43,9 +45,14 @@
 		return
 	set_snowflake_from_config(id)
 
+/obj/item/toy/plush/DoRevenantThrowEffects(atom/target)
+	var/datum/component/squeak/squeaker = GetComponent(/datum/component/squeak)
+	squeaker.do_play_squeak(TRUE)
+
 /obj/item/toy/plush/Initialize(mapload, set_snowflake_id)
 	. = ..()
 	AddComponent(/datum/component/squeak, squeak_override)
+	AddElement(/datum/element/bed_tuckable, 6, -5, 90)
 
 	//have we decided if Pinocchio goes in the blue or pink aisle yet?
 	if(gender == NEUTER)
@@ -112,10 +119,21 @@
 
 	return ..()
 
+/obj/item/toy/plush/vv_get_var(var_name)
+	if(var_name == NAMEOF(src, __ADMIN_SET_TO_ID))
+		return debug_variable("__ADMIN: SET SNOWFLAKE ID", snowflake_id, 0, src)
+	return ..()
+
+/obj/item/toy/plush/vv_edit_var(var_name, var_value)
+	if(var_name == NAMEOF(src, __ADMIN_SET_TO_ID))
+		return set_snowflake_from_config(var_value)
+	return ..()
+
 /obj/item/toy/plush/proc/set_snowflake_from_config(id)
 	var/list/configlist = CONFIG_GET(keyed_list/snowflake_plushies)
 	var/list/jsonlist = configlist[id]
-	ASSERT(jsonlist)
+	if(!jsonlist)
+		return FALSE
 	jsonlist = json_decode(jsonlist)
 	if(jsonlist["inherit_from"])
 		var/path = text2path(jsonlist["inherit_from"])
@@ -150,6 +168,8 @@
 	if(squeak_override)
 		var/datum/component/squeak/S = GetComponent(/datum/component/squeak)
 		S?.override_squeak_sounds = squeak_override
+	snowflake_id = id
+	return TRUE
 
 /obj/item/toy/plush/handle_atom_del(atom/A)
 	if(A == grenade)
@@ -167,7 +187,7 @@
 					return
 			log_game("[key_name(user)] activated a hidden grenade in [src].")
 			grenade.preprime(user, msg = FALSE, volume = 10)
-			SEND_SIGNAL(user, COMSIG_ADD_MOOD_EVENT,"plushpet", /datum/mood_event/plushpet)
+		SEND_SIGNAL(user, COMSIG_ADD_MOOD_EVENT,"plushpet", /datum/mood_event/plushpet)
 	else
 		to_chat(user, "<span class='notice'>You try to pet [src], but it has no stuffing. Aww...</span>")
 		SEND_SIGNAL(user, COMSIG_ADD_MOOD_EVENT,"plush_nostuffing", /datum/mood_event/plush_nostuffing)
@@ -426,7 +446,7 @@
 			mood_message = null
 	cheer_up()
 
-/obj/item/toy/plush/proc/update_desc()
+/obj/item/toy/plush/update_desc()
 	desc = normal_desc
 	if(mood_message)
 		desc += mood_message
@@ -446,6 +466,7 @@ GLOBAL_LIST_INIT(valid_plushie_paths, valid_plushie_paths())
 	can_random_spawn = FALSE
 
 /obj/item/toy/plush/random/Initialize()
+	..()
 	var/newtype
 	var/list/snowflake_list = CONFIG_GET(keyed_list/snowflake_plushies)
 
@@ -591,6 +612,12 @@ GLOBAL_LIST_INIT(valid_plushie_paths, valid_plushie_paths())
 	icon_state = "kobold"
 	item_state = "kobold"
 
+/obj/item/toy/plush/lizardplushie/kobold
+	name = "spacelizard plushie"
+	desc = "An adorable stuffed toy that resembles a lizard in a suit."
+	icon_state = "plushie_spacelizard"
+	item_state = "plushie_spacelizard"
+
 /obj/item/toy/plush/nukeplushie
 	name = "operative plushie"
 	desc = "A stuffed toy that resembles a syndicate nuclear operative. The tag claims operatives to be purely fictitious."
@@ -622,17 +649,17 @@ GLOBAL_LIST_INIT(valid_plushie_paths, valid_plushie_paths())
 /obj/item/toy/plush/beeplushie
 	name = "bee plushie"
 	desc = "A cute toy that resembles an even cuter bee."
-	icon_state = "plushie_h"
-	item_state = "plushie_h"
+	icon_state = "plushie_bee"
+	item_state = "plushie_bee"
 	attack_verb = list("stung")
 	gender = FEMALE
 	squeak_override = list('modular_citadel/sound/voice/scream_moth.ogg' = 1)
 
 /obj/item/toy/plush/mothplushie
-	name = "insect plushie"
+	name = "moth plushie"
 	desc = "An adorable stuffed toy that resembles some kind of insect."
-	icon_state = "bumble"
-	item_state = "bumble"
+	icon_state = "moff"
+	item_state = "moff"
 	squeak_override = list('modular_citadel/sound/voice/mothsqueak.ogg' = 1)
 	can_random_spawn = FALSE
 
@@ -643,6 +670,20 @@ GLOBAL_LIST_INIT(valid_plushie_paths, valid_plushie_paths())
 	item_state = "plushie_lamp"
 	attack_verb = list("lit", "flickered", "flashed")
 	squeak_override = list('sound/weapons/magout.ogg' = 1)
+
+/obj/item/toy/plush/drake
+	name = "drake plushie"
+	desc = "A large beast from lavaland turned into a marketable plushie!"
+	icon_state = "drake"
+	item_state = "drake"
+	attack_verb = list("bit", "devoured", "burned")
+
+/obj/item/toy/plush/deer
+	name = "deer plushie"
+	desc = "Oh deer, a plushie!"
+	icon_state = "deer"
+	item_state = "deer"
+	attack_verb = list("bleated", "rammed", "kicked")
 
 /obj/item/toy/plush/box
 	name = "cardboard plushie"
@@ -673,7 +714,7 @@ GLOBAL_LIST_INIT(valid_plushie_paths, valid_plushie_paths())
 	attack_verb = list("scanned", "beeped", "stared")
 
 /obj/item/toy/plush/borgplushie
-	name = "robot plushie"
+	name = "K9 plushie"
 	desc = "An adorable stuffed toy of a robot."
 	icon_state = "securityk9"
 	item_state = "securityk9"
@@ -681,36 +722,27 @@ GLOBAL_LIST_INIT(valid_plushie_paths, valid_plushie_paths())
 	squeak_override = list('sound/machines/beep.ogg' = 1)
 
 /obj/item/toy/plush/borgplushie/medihound
+	name = "medihound plushie"
 	icon_state = "medihound"
 	item_state = "medihound"
 
 /obj/item/toy/plush/borgplushie/scrubpuppy
+	name = "scrubpuppy plushie"
 	icon_state = "scrubpuppy"
 	item_state = "scrubpuppy"
 
-/obj/item/toy/plush/borgplushie/meddrake
-	name = "MediDrake Plushie"
-	desc = "An adorable stuffed toy of a Medidrake."
-	icon_state = "meddrake"
-	item_state = "meddrake"
-
-/obj/item/toy/plush/borgplushie/secdrake
-	name = "SecDrake Plushie"
-	desc = "An adorable stuffed toy of a Secdrake."
-	icon_state = "secdrake"
-	item_state = "secdrake"
+/obj/item/toy/plush/borgplushie/pupdozer
+	name = "pupdozer plushie"
+	icon_state = "pupdozer"
+	item_state = "pupdozer"
 
 /obj/item/toy/plush/aiplush
 	name = "AI plushie"
 	desc = "A little stuffed toy AI core... it appears to be malfunctioning."
-	icon_state = "exo"
-	item_state = "exo"
+	icon_state = "malfai"
+	item_state = "malfai"
 	attack_verb = list("hacked", "detonated", "overloaded")
 	squeak_override = list('sound/machines/beep.ogg' = 9, 'sound/machines/buzz-two.ogg' = 1)
-
-/obj/item/toy/plush/mammal/fox
-	icon_state = "fox"
-	item_state = "fox"
 
 /obj/item/toy/plush/snakeplushie
 	name = "snake plushie"
@@ -723,6 +755,72 @@ GLOBAL_LIST_INIT(valid_plushie_paths, valid_plushie_paths())
 /obj/item/toy/plush/mammal
 	name = "mammal plushie"
 	desc = "An adorable stuffed toy resembling some sort of crew member."
+	icon_state = "ych"
+	item_state = "ych"
+	can_random_spawn = FALSE
+
+/obj/item/toy/plush/mammal/fox
+	name = "fox plushie"
+	desc = "An adorable stuffed toy resembling a fox."
+	icon_state = "fox"
+	item_state = "fox"
+	attack_verb = list("yipped", "geckered", "yapped")
+
+/obj/item/toy/plush/mammal/dog
+	name = "dog plushie"
+	icon_state = "corgi"
+	item_state = "corgi"
+	desc = "An adorable stuffed toy that resembles a dog."
+	attack_verb = list("barked", "boofed", "borked")
+	squeak_override = list(
+	'modular_citadel/sound/voice/bark1.ogg' = 1,
+	'modular_citadel/sound/voice/bark2.ogg' = 1
+	)
+
+/obj/item/toy/plush/mammal/dog/fcorgi
+	name = "corgi plushie"
+	icon_state = "girlycorgi"
+	item_state = "girlycorgi"
+	desc = "An adorable stuffed toy that resembles a dog. This one dons a pink ribbon."
+
+/obj/item/toy/plush/mammal/dog/borgi
+	name = "borgi plushie"
+	icon_state = "borgi"
+	item_state = "borgi"
+	desc = "An adorable stuffed toy that resembles a robot dog."
+
+/obj/item/toy/plush/xeno
+	name = "xenohybrid plushie"
+	desc = "An adorable stuffed toy that resembles a xenomorphic crewmember."
+	icon_state = "xeno"
+	item_state = "xeno"
+	squeak_override = list('sound/voice/hiss2.ogg' = 1)
+	can_random_spawn = FALSE
+
+/obj/item/toy/plush/bird
+	name = "bird plushie"
+	desc = "An adorable stuffed plushie that resembles an avian."
+	icon_state = "bird"
+	item_state = "bird"
+	attack_verb = list("peeped", "beeped", "poofed")
+	squeak_override = list('modular_citadel/sound/voice/peep.ogg' = 1)
+	can_random_spawn = FALSE
+
+/obj/item/toy/plush/sergal
+	name = "sergal plushie"
+	desc = "An adorable stuffed plushie that resembles a sagaru."
+	icon_state = "sergal"
+	item_state = "sergal"
+	squeak_override = list('modular_citadel/sound/voice/merp.ogg' = 1)
+	can_random_spawn = FALSE
+
+/obj/item/toy/plush/catgirl
+	name = "feline plushie"
+	desc = "An adorable stuffed toy that resembles a feline."
+	icon_state = "cat"
+	item_state = "cat"
+	attack_verb = list("headbutt", "scritched", "bit")
+	squeak_override = list('modular_citadel/sound/voice/nya.ogg' = 1)
 	can_random_spawn = FALSE
 
 /obj/item/toy/plush/catgirl/fermis
@@ -733,41 +831,26 @@ GLOBAL_LIST_INIT(valid_plushie_paths, valid_plushie_paths())
 	attack_verb = list("cuddled", "petpatted", "wigglepurred")
 	squeak_override = list('modular_citadel/sound/voice/merowr.ogg' = 1)
 
-/obj/item/toy/plush/xeno
-	name = "xenohybrid plushie"
-	desc = "An adorable stuffed toy that resmembles a xenomorphic crewmember."
-	squeak_override = list('sound/voice/hiss2.ogg' = 1)
-	can_random_spawn = FALSE
+/obj/item/toy/plush/teddybear
+	name = "teddy"
+	desc = "It's a teddy bear!"
+	icon_state = "teddy"
+	item_state = "teddy"
 
-/obj/item/toy/plush/bird
-	name = "bird plushie"
-	desc = "An adorable stuffed plushie that resembles an avian."
-	attack_verb = list("peeped", "beeped", "poofed")
-	squeak_override = list('modular_citadel/sound/voice/peep.ogg' = 1)
-	can_random_spawn = FALSE
+/obj/item/toy/plush/crab
+	name = "crab plushie"
+	desc = "Fewer pinches than a real one, but it still clicks."
+	icon_state = "crab"
+	item_state = "crab"
+	attack_verb = list("clicked", "clacked", "pinched")
 
-/obj/item/toy/plush/sergal
-	name = "sergal plushie"
-	desc = "An adorable stuffed plushie that resembles a sagaru."
-	squeak_override = list('modular_citadel/sound/voice/merp.ogg' = 1)
-	can_random_spawn = FALSE
+/obj/item/toy/plush/gondola
+	name = "gondola plushie"
+	desc = "Just looking at it seems to calm you down. Please do not eat it though."
+	icon_state = "gondola"
+	item_state = "gondola"
+	attack_verb = list("calmed", "smiled", "peaced")
 
-/obj/item/toy/plush/mammal/dog
-	desc = "An adorable stuffed toy that resembles a canine."
-	attack_verb = list("barked", "boofed", "borked")
-	squeak_override = list(
-	'modular_citadel/sound/voice/bark1.ogg' = 1,
-	'modular_citadel/sound/voice/bark2.ogg' = 1
-	)
-
-/obj/item/toy/plush/catgirl
-	name = "feline plushie"
-	desc = "An adorable stuffed toy that resembles a feline."
-	attack_verb = list("headbutt", "scritched", "bit")
-	squeak_override = list('modular_citadel/sound/voice/nya.ogg' = 1)
-	can_random_spawn = FALSE
-	
-	
 /obj/item/toy/plush/hairball
 	name = "Hairball"
 	desc = "A bundle of undigested fibers and scales. Yuck."
@@ -777,3 +860,82 @@ GLOBAL_LIST_INIT(valid_plushie_paths, valid_plushie_paths())
 	squeak_override = list('sound/misc/splort.ogg'=1)
 	attack_verb = list("sploshed", "splorted", "slushed")
 	can_random_spawn = FALSE
+
+/obj/item/toy/plush/plushling
+	name = "peculiar plushie"
+	desc = "An adorable stuffed toy- wait, did it just move?"
+	can_random_spawn = FALSE
+	var/absorb_cooldown = 100 //ticks cooldown between absorbs
+	var/next_absorb = 0 //When can it absorb another plushie
+	var/check_interval = 20
+	var/next_check = 0
+
+//Overrides parent proc
+/obj/item/toy/plush/plushling/attack_self(mob/user)
+	if(!user) //hmmmmm
+		return
+	to_chat(user, "<span class='warning'>You try to pet the plushie, but recoil as it bites your hand instead! OW!</span>")
+	SEND_SIGNAL(user, COMSIG_ADD_MOOD_EVENT,"plush_bite", /datum/mood_event/plush_bite)
+	var/mob/living/carbon/human/H = user
+	if(!H)
+		return //Type safety.
+	H.apply_damage(5, BRUTE, pick(BODY_ZONE_L_ARM, BODY_ZONE_R_ARM))
+	addtimer(CALLBACK(H, /mob/living/carbon/human.proc/dropItemToGround, src, TRUE), 1)
+
+/obj/item/toy/plush/plushling/New()
+	var/initial_state = pick("plushie_lizard", "plushie_snake", "plushie_slime", "fox")
+	icon_state = initial_state
+	item_state = initial_state
+	START_PROCESSING(SSobj, src)
+	. = ..()
+
+/obj/item/toy/plush/plushling/Destroy()
+	STOP_PROCESSING(SSobj, src)
+	. = ..()
+
+/obj/item/toy/plush/plushling/process()
+	if(world.time < next_absorb || world.time < next_check)
+		return
+	next_check = world.time + check_interval
+	var/obj/item/toy/plush/target
+	for(var/obj/item/toy/plush/possible_target in loc) //First, it tries to get anything in its same location, be it a tile or a backpack
+		if(possible_target == src || istype(possible_target, /obj/item/toy/plush/plushling))
+			continue
+		target = possible_target
+		break
+	if(!target)
+		if(!isturf(loc))
+			return
+		for(var/obj/item/toy/plush/P in oview(1, src)) //If that doesn't work, it hunts for plushies adjacent to its own tile
+			if(istype(P, /obj/item/toy/plush/plushling)) //These do not hunt their own kind
+				continue
+			src.throw_at(P, 1, 2)
+			visible_message("<span class='danger'>[src] leaps at [P]!</span>")
+			break
+		return
+	if(istype(target, /obj/item/toy/plush/plushling)) //These do not consume their own.
+		return
+	next_absorb = world.time + absorb_cooldown
+	plushie_absorb(target)
+
+/obj/item/toy/plush/plushling/proc/plushie_absorb(obj/item/toy/plush/victim)
+	if(!victim)
+		return
+	visible_message("<span class='warning'>[src] gruesomely mutilliates [victim], leaving nothing more than dust!</span>")
+	if(victim.snowflake_id) //Snowflake code for snowflake plushies.
+		set_snowflake_from_config(victim.snowflake_id)
+		desc += " Wait, did it just move..?"
+	else
+		name = victim.name
+		desc = victim.desc + " Wait, did it just move..?"
+		icon_state = victim.icon_state
+		item_state = victim.item_state
+		squeak_override = victim.squeak_override
+		attack_verb = victim.attack_verb
+	new /obj/effect/decal/cleanable/ash(get_turf(victim))
+	qdel(victim)
+
+/obj/item/toy/plush/plushling/love(obj/item/toy/plush/Kisser, mob/living/user) //You shouldn't have come here, poor plush.
+	if(!Kisser)
+		return
+	plushie_absorb(Kisser)

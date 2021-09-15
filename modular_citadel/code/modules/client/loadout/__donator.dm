@@ -40,12 +40,6 @@
 	path = /obj/item/bikehorn/airhorn
 	ckeywhitelist = list("kevinz000")
 
-/datum/gear/donator/cebusoap
-	name = "Cebutris' soap"
-	slot = SLOT_IN_BACKPACK
-	path = /obj/item/custom/ceb_soap
-	ckeywhitelist = list("cebutris")
-
 /datum/gear/donator/kiaracloak
 	name = "Kiara's cloak"
 	slot = SLOT_NECK
@@ -260,13 +254,13 @@
 /datum/gear/donator/toriball
 	name = "Rainbow Tennis Ball"
 	slot = SLOT_IN_BACKPACK
-	path = /obj/item/toy/tennis/rainbow
+	path = /obj/item/toy/fluff/tennis_poly/tri/squeak/rainbow
 	ckeywhitelist = list("annoymous35")
 
 /datum/gear/donator/izzyball
 	name = "Katlin's Ball"
 	slot = SLOT_IN_BACKPACK
-	path = /obj/item/toy/tennis/rainbow/izzy
+	path = /obj/item/toy/fluff/tennis_poly/tri/squeak/izzy
 	ckeywhitelist = list("izzyinbox")
 
 /datum/gear/donator/cloak
@@ -293,6 +287,8 @@
 	slot = SLOT_IN_BACKPACK
 	path = /obj/item/clothing/neck/cloak/polychromic/polyce
 	ckeywhitelist = list("worksbythesea", "blakeryan")
+	loadout_flags = LOADOUT_CAN_COLOR_POLYCHROMIC
+	loadout_initial_colors = list("#808080", "#8CC6FF", "#FF3535")
 
 /datum/gear/donator/ssk
 	name = "Stun Sword Kit"
@@ -516,3 +512,51 @@
 	slot = SLOT_IN_BACKPACK
 	path = /obj/item/bedsheet/cosmos
 	ckeywhitelist = list("grunnyyy")
+
+/datum/gear/donator/customskirt
+	name = "custom atmos skirt"
+	slot = SLOT_IN_BACKPACK
+	path = /obj/item/clothing/under/custom/customskirt
+	ckeywhitelist = list("thakyz")
+
+/datum/gear/donator/hisakaki
+	name = "halo"
+	slot = SLOT_HEAD
+	path = 	/obj/item/clothing/head/halo
+	ckeywhitelist = list("hisakaki")
+
+/datum/gear/donator/vest
+	name = "vest and shirt"
+	slot = SLOT_W_UNIFORM
+	path = /obj/item/clothing/under/custom/vest
+	ckeywhitelist = list("maylowfox")
+
+/datum/gear/donator/exo
+	name = "exo frame"
+	slot = SLOT_WEAR_SUIT
+	path = /obj/item/clothing/suit/custom/exo
+	ckeywhitelist = list("jesterz7")
+
+/datum/gear/donator/choker
+	name = "NT Choker"
+	slot = SLOT_NECK
+	path = /obj/item/clothing/neck/petcollar/donorchoker
+	ckeywhitelist = list("trigillass")
+
+/datum/gear/donator/strangemask
+	name = "Strange Metal Mask"
+	slot = SLOT_IN_BACKPACK
+	path = /obj/item/clothing/mask/breath/mmask
+	ckeywhitelist = list("sneka")
+
+/datum/gear/donator/smaiden
+	name = "shrine maiden outfit"
+	slot = SLOT_W_UNIFORM
+	path = /obj/item/clothing/under/smaiden
+	ckeywhitelist = list("ultimarifox")
+
+/datum/gear/donator/mgasmask
+	name = "Military Gas Mask"
+	slot = SLOT_IN_BACKPACK
+	path = /obj/item/clothing/mask/gas/military
+	ckeywhitelist = list("unclebourbon")

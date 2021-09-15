@@ -21,6 +21,9 @@ GLOBAL_VAR_INIT(hhmysteryRoomNumber, 1337)
 /obj/item/hilbertshotel/Initialize()
 	. = ..()
 	//Load templates
+	INVOKE_ASYNC(src, .proc/prepare_rooms)
+
+/obj/item/hilbertshotel/proc/prepare_rooms()
 	hotelRoomTemp = new()
 	hotelRoomTempEmpty = new()
 	hotelRoomTempLore = new()
@@ -183,6 +186,13 @@ GLOBAL_VAR_INIT(hhmysteryRoomNumber, 1337)
 	. = ..()
 	promptAndCheckIn(user)
 
+/obj/item/hilbertshotel/ghostdojo/linkTurfs(datum/turf_reservation/currentReservation, currentRoomnumber)
+	. = ..()
+	var/area/hilbertshotel/currentArea = get_area(locate(currentReservation.bottom_left_coords[1], currentReservation.bottom_left_coords[2], currentReservation.bottom_left_coords[3]))
+	for(var/turf/closed/indestructible/hoteldoor/door in currentArea)
+		door.parentSphere = src
+		door.desc = "The door to this hotel room. Strange, this door doesnt even seem openable. The doorknob, however, seems to buzz with unusual energy...<br /><span class='info'>Alt-Click to look through the peephole.</span>"
+
 //Template Stuff
 /datum/map_template/hilbertshotel
 	name = "Hilbert's Hotel Room"
@@ -292,7 +302,7 @@ GLOBAL_VAR_INIT(hhmysteryRoomNumber, 1337)
 		user.reset_perspective(parentSphere)
 		user.set_machine(src)
 		var/datum/action/peepholeCancel/PHC = new
-		user.overlay_fullscreen("remote_view", /obj/screen/fullscreen/impaired, 1)
+		user.overlay_fullscreen("remote_view", /atom/movable/screen/fullscreen/impaired, 1)
 		PHC.Grant(user)
 		return TRUE
 
@@ -319,9 +329,7 @@ GLOBAL_VAR_INIT(hhmysteryRoomNumber, 1337)
 	icon_state = "hilbertshotel"
 	requires_power = FALSE
 	has_gravity = TRUE
-	noteleport = TRUE
-	hidden = TRUE
-	unique = FALSE
+	area_flags = NOTELEPORT | HIDDEN_AREA
 	dynamic_lighting = DYNAMIC_LIGHTING_FORCED
 	ambientsounds = list('sound/ambience/servicebell.ogg')
 	var/roomnumber = 0
@@ -398,8 +406,7 @@ GLOBAL_VAR_INIT(hhmysteryRoomNumber, 1337)
 	icon_state = "hilbertshotel"
 	requires_power = FALSE
 	has_gravity = TRUE
-	noteleport = TRUE
-	hidden = TRUE
+	area_flags = NOTELEPORT | HIDDEN_AREA
 
 /obj/item/abstracthotelstorage
 	anchored = TRUE

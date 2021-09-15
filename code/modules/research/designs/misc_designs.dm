@@ -245,6 +245,36 @@
 	category = list("Equipment")
 	departmental_flags = DEPARTMENTAL_FLAG_SERVICE
 
+/datum/design/emptybottle
+	name = "Glass Bottle"
+	desc = "A small, empty bottle for storing liquids."
+	id = "emptyglassbottle"
+	build_type = PROTOLATHE
+	materials = list(/datum/material/glass = 400)
+	build_path = /obj/item/reagent_containers/food/drinks/bottle/blank/small
+	category = list("Equipment")
+	departmental_flags = DEPARTMENTAL_FLAG_SERVICE
+
+/datum/design/largeemptybottle
+	name = "Large Glass Bottle"
+	desc = "A large, empty bottle for storing liquids."
+	id = "largeemptyglassbottle"
+	build_type = PROTOLATHE
+	materials = list(/datum/material/glass = 2000)
+	build_path = /obj/item/reagent_containers/food/drinks/bottle/blank
+	category = list("Equipment")
+	departmental_flags = DEPARTMENTAL_FLAG_SERVICE
+
+/datum/design/emptypitcher
+	name = "Pitcher"
+	desc = "A large Pitcher to hold vast amounts of liquid."
+	id = "emptypitcher"
+	build_type = PROTOLATHE
+	materials = list(/datum/material/glass = 3600)
+	build_path = /obj/item/reagent_containers/food/drinks/bottle/blank/pitcher
+	category = list("Equipment")
+	departmental_flags = DEPARTMENTAL_FLAG_SERVICE
+
 /datum/design/air_horn
 	name = "Air Horn"
 	desc = "Damn son, where'd you find this?"
@@ -375,7 +405,7 @@
 	materials = list(/datum/material/iron = 1500, /datum/material/silver = 150, /datum/material/glass = 3000)
 	build_path = /obj/item/lightreplacer
 	category = list("Equipment")
-	departmental_flags = DEPARTMENTAL_FLAG_SERVICE
+	departmental_flags = DEPARTMENTAL_FLAG_SERVICE | DEPARTMENTAL_FLAG_ENGINEERING
 
 /datum/design/normtrash
 	name = "Trashbag"
@@ -469,7 +499,7 @@
 	build_type = PROTOLATHE
 	materials = list(/datum/material/iron = 5000, /datum/material/glass = 1000, /datum/material/gold = 1000, /datum/material/silver = 1000)
 	build_path = /obj/item/holosign_creator/engineering
-	category = list("Equipment")
+	category = list("Tool Designs")
 	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING
 
 /datum/design/holosignatmos
@@ -479,9 +509,9 @@
 	build_type = PROTOLATHE
 	materials = list(/datum/material/iron = 5000, /datum/material/glass = 1000, /datum/material/gold = 1000, /datum/material/silver = 1000)
 	build_path = /obj/item/holosign_creator/atmos
-	category = list("Equipment")
+	category = list("Tool Designs")
 	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING
-
+/*
 /datum/design/holosignfirelock
 	name = "ATMOS Holofirelock Projector"
 	desc = "A holographic projector that creates holographic barriers that prevent changes in temperature conditions."
@@ -489,9 +519,9 @@
 	build_type = PROTOLATHE
 	materials = list(/datum/material/iron = 5000, /datum/material/glass = 1000, /datum/material/gold = 1000, /datum/material/silver = 1000)
 	build_path = /obj/item/holosign_creator/firelock
-	category = list("Equipment")
+	category = list("Tool Designs")
 	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING
-
+*/
 /datum/design/holosigncombifan
 	name = "ATMOS Holo-Combifan Projector"
 	desc = "A holographic projector that creates holographic barriers that prevent changes in atmospheric and temperature conditions."
@@ -499,7 +529,7 @@
 	build_type = PROTOLATHE
 	materials = list(/datum/material/iron = 7500, /datum/material/glass = 2500, /datum/material/silver = 2500, /datum/material/gold = 2500, /datum/material/titanium = 1750)
 	build_path = /obj/item/holosign_creator/combifan
-	category = list("Equipment")
+	category = list("Tool Designs")
 	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING
 
 /datum/design/forcefield_projector
@@ -509,7 +539,7 @@
 	build_type = PROTOLATHE
 	materials = list(/datum/material/iron = 2500, /datum/material/glass = 1000)
 	build_path = /obj/item/forcefield_projector
-	category = list("Equipment")
+	category = list("Tool Designs")
 	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING
 
 /datum/design/holobarrier_med

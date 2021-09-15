@@ -75,12 +75,8 @@
 		. = pda.owner
 	else if(istype(tablet))
 		var/obj/item/computer_hardware/card_slot/card_slot = tablet.all_components[MC_CARD]
-		if(card_slot && (card_slot.stored_card2 || card_slot.stored_card))
-			if(card_slot.stored_card2) //The second card is the one used for authorization in the ID changing program, so we prioritize it here for consistency
-				. = card_slot.stored_card2.registered_name
-			else
-				if(card_slot.stored_card)
-					. = card_slot.stored_card.registered_name
+		if(card_slot?.stored_card)
+			. = card_slot.stored_card.registered_name
 	if(!.)
 		. = if_no_id	//to prevent null-names making the mob unclickable
 	return
@@ -119,12 +115,12 @@
 	. = ..()
 	if(!.)
 		return
+	if(HAS_TRAIT(src, TRAIT_NOGUNS))
+		to_chat(src, "<span class='warning'>You can't bring yourself to use a ranged weapon!</span>")
+		return FALSE
 	if(G.trigger_guard == TRIGGER_GUARD_NORMAL)
 		if(HAS_TRAIT(src, TRAIT_CHUNKYFINGERS))
 			to_chat(src, "<span class='warning'>Your meaty finger is much too large for the trigger guard!</span>")
-			return FALSE
-		if(HAS_TRAIT(src, TRAIT_NOGUNS))
-			to_chat(src, "<span class='warning'>Your fingers don't fit in the trigger guard!</span>")
 			return FALSE
 
 /mob/living/carbon/human/proc/get_bank_account()
@@ -180,3 +176,14 @@
 
 /mob/living/carbon/human/get_biological_state()
 	return dna.species.get_biological_state()
+
+///copies over clothing preferences like underwear to another human
+/mob/living/carbon/human/proc/copy_clothing_prefs(mob/living/carbon/human/destination)
+	destination.underwear = underwear
+	destination.undershirt = undershirt
+	destination.socks = socks
+
+/mob/living/carbon/human/adjust_integration_blood(value, force)
+	if(NOBLOOD in dna.species.species_traits) //Can't lose blood if your species doesn't have any
+		return
+	. = ..()

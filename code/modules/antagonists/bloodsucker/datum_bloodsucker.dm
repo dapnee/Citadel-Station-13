@@ -138,7 +138,7 @@
 		if(owner.current.gender == MALE)
 			if(prob(10)) // Gender override
 				bloodsucker_reputation = pick("King of the Damned", "Blood King", "Emperor of Blades", "Sinlord", "God-King")
-		else
+		else if(owner.current.gender == FEMALE)
 			if(prob(10)) // Gender override
 				bloodsucker_reputation = pick("Queen of the Damned", "Blood Queen", "Empress of Blades", "Sinlady", "God-Queen")
 
@@ -341,10 +341,12 @@
 
 //This handles the application of antag huds/special abilities
 /datum/antagonist/bloodsucker/apply_innate_effects(mob/living/mob_override)
+	RegisterSignal(owner.current,COMSIG_LIVING_BIOLOGICAL_LIFE,.proc/LifeTick)
 	return
 
 //This handles the removal of antag huds/special abilities
 /datum/antagonist/bloodsucker/remove_innate_effects(mob/living/mob_override)
+	UnregisterSignal(owner.current,COMSIG_LIVING_BIOLOGICAL_LIFE)
 	return
 
 //Assign default team and creates one for one of a kind team antagonists
@@ -668,9 +670,9 @@
 #define ui_vamprank_display "WEST:6,CENTER-2:-5"   // 2 tiles down
 
 /datum/hud
-	var/obj/screen/bloodsucker/blood_counter/blood_display
-	var/obj/screen/bloodsucker/rank_counter/vamprank_display
-	var/obj/screen/bloodsucker/sunlight_counter/sunlight_display
+	var/atom/movable/screen/bloodsucker/blood_counter/blood_display
+	var/atom/movable/screen/bloodsucker/rank_counter/vamprank_display
+	var/atom/movable/screen/bloodsucker/sunlight_counter/sunlight_display
 
 /datum/antagonist/bloodsucker/proc/add_hud()
 	return
@@ -706,36 +708,36 @@
 			owner.current.hud_used.vamprank_display.icon_state = (bloodsucker_level_unspent > 0) ? "rank_up" : "rank"
 
 
-/obj/screen/bloodsucker
+/atom/movable/screen/bloodsucker
 	invisibility = INVISIBILITY_ABSTRACT
 
-/obj/screen/bloodsucker/proc/clear()
+/atom/movable/screen/bloodsucker/proc/clear()
 	invisibility = INVISIBILITY_ABSTRACT
 
-/obj/screen/bloodsucker/proc/update_counter(value, valuecolor)
+/atom/movable/screen/bloodsucker/proc/update_counter(value, valuecolor)
 	invisibility = 0
 
-/obj/screen/bloodsucker/blood_counter
+/atom/movable/screen/bloodsucker/blood_counter
 	icon = 'icons/mob/actions/bloodsucker.dmi'
 	name = "Blood Consumed"
 	icon_state = "blood_display"
 	screen_loc = ui_blood_display
 
-/obj/screen/bloodsucker/blood_counter/update_counter(value, valuecolor)
+/atom/movable/screen/bloodsucker/blood_counter/update_counter(value, valuecolor)
 	..()
 	maptext = "<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='[valuecolor]'>[round(value,1)]</font></div>"
 
-/obj/screen/bloodsucker/rank_counter
+/atom/movable/screen/bloodsucker/rank_counter
 	name = "Bloodsucker Rank"
 	icon = 'icons/mob/actions/bloodsucker.dmi'
 	icon_state = "rank"
 	screen_loc = ui_vamprank_display
 
-/obj/screen/bloodsucker/rank_counter/update_counter(value, valuecolor)
+/atom/movable/screen/bloodsucker/rank_counter/update_counter(value, valuecolor)
 	..()
 	maptext = "<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='[valuecolor]'>[round(value,1)]</font></div>"
 
-/obj/screen/bloodsucker/sunlight_counter
+/atom/movable/screen/bloodsucker/sunlight_counter
 	icon = 'icons/mob/actions/bloodsucker.dmi'
 	name = "Solar Flare Timer"
 	icon_state = "sunlight_night"
@@ -759,7 +761,7 @@
 		owner.current.hud_used.sunlight_display.icon_state = "sunlight_" + (amDay ? "day":"night")
 
 
-/obj/screen/bloodsucker/sunlight_counter/update_counter(value, valuecolor)
+/atom/movable/screen/bloodsucker/sunlight_counter/update_counter(value, valuecolor)
 	..()
 	maptext = "<div align='center' valign='bottom' style='position:relative; top:0px; left:6px'><font color='[valuecolor]'>[value]</font></div>"
 

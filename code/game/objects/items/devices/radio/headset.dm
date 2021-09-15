@@ -69,7 +69,8 @@ GLOBAL_LIST_INIT(channel_tokens, list(
 /obj/item/radio/headset/talk_into(mob/living/M, message, channel, list/spans,datum/language/language)
 	if (!listening)
 		return ITALICS | REDUCE_RANGE
-	return ..()
+	if (language != /datum/language/signlanguage)
+		return ..()
 
 /obj/item/radio/headset/can_receive(freq, level, AIuser)
 	if(ishuman(src.loc))
@@ -103,6 +104,12 @@ GLOBAL_LIST_INIT(channel_tokens, list(
 	qdel(keyslot)
 	keyslot = new /obj/item/encryptionkey/binary
 	recalculateChannels()
+
+/obj/item/radio/headset/headset_prisoner
+	name = "prison radio headset"
+	desc = "An updated, modular intercom that fits over the head. Takes encryption keys. It looks like it has been modified to not broadcast."
+	icon_state = "prisoner_headset"
+	prison_radio = TRUE
 
 /obj/item/radio/headset/headset_sec
 	name = "security radio headset"
@@ -277,20 +284,18 @@ GLOBAL_LIST_INIT(channel_tokens, list(
 			to_chat(user,"<span class='notice'>You upgrade [src].</span>")
 			bowmanize()
 			qdel(W)
-	if(istype(W, /obj/item/screwdriver))
+	if(W.tool_behaviour == TOOL_SCREWDRIVER)
 		if(keyslot || keyslot2)
 			for(var/ch_name in channels)
 				SSradio.remove_object(src, GLOB.radiochannels[ch_name])
 				secure_radio_connections[ch_name] = null
 
-			var/turf/T = user.drop_location()
-			if(T)
-				if(keyslot)
-					keyslot.forceMove(T)
-					keyslot = null
-				if(keyslot2)
-					keyslot2.forceMove(T)
-					keyslot2 = null
+			if(keyslot)
+				user.put_in_hands(keyslot)
+				keyslot = null
+			if(keyslot2)
+				user.put_in_hands(keyslot2)
+				keyslot2 = null
 
 			recalculateChannels()
 			to_chat(user, "<span class='notice'>You pop out the encryption keys in the headset.</span>")

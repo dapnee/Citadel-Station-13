@@ -2,6 +2,7 @@
 	name = "nuclear emergency"
 	config_tag = "nuclear"
 	false_report_weight = 10
+	chaos = 9
 	required_players = 28 // 30 players - 3 players to be the nuke ops = 25 players remaining
 	required_enemies = 2
 	recommended_enemies = 5
@@ -126,7 +127,7 @@
 	l_pocket = /obj/item/pinpointer/nuke/syndicate
 	id = /obj/item/card/id/syndicate
 	belt = /obj/item/gun/ballistic/automatic/pistol
-	backpack_contents = list(/obj/item/storage/box/syndie=1,\
+	backpack_contents = list(/obj/item/storage/box/survival/syndie=1,\
 		/obj/item/kitchen/knife/combat/survival)
 
 	var/tc = 25
@@ -172,7 +173,7 @@
 	internals_slot = SLOT_R_STORE
 	belt = /obj/item/storage/belt/military
 	r_hand = /obj/item/gun/ballistic/automatic/shotgun/bulldog
-	backpack_contents = list(/obj/item/storage/box/syndie=1,\
+	backpack_contents = list(/obj/item/storage/box/survival/syndie=1,\
 		/obj/item/tank/jetpack/oxygen/harness=1,\
 		/obj/item/gun/ballistic/automatic/pistol=1,\
 		/obj/item/kitchen/knife/combat/survival)
@@ -187,7 +188,7 @@
 	r_pocket = /obj/item/tank/internals/emergency_oxygen/engi
 	internals_slot = SLOT_R_STORE
 	belt = /obj/item/storage/belt/military
-	backpack_contents = list(/obj/item/storage/box/syndie=1,\
+	backpack_contents = list(/obj/item/storage/box/survival/syndie=1,\
 	/obj/item/tank/jetpack/oxygen/harness=1,\
 	/obj/item/gun/ballistic/automatic/pistol=1,\
 	/obj/item/kitchen/knife/combat/survival)

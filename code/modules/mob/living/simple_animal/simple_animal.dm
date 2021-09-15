@@ -6,6 +6,8 @@
 	gender = PLURAL //placeholder
 	///How much blud it has for bloodsucking
 	blood_volume = 550
+	rad_flags = RAD_NO_CONTAMINATE
+	hud_type = /datum/hud/living/simple_animal
 
 	status_flags = CANPUSH
 
@@ -262,10 +264,10 @@
 		var/turf/open/ST = src.loc
 		if(ST.air)
 
-			var/tox = ST.air.get_moles(/datum/gas/plasma)
-			var/oxy = ST.air.get_moles(/datum/gas/oxygen)
-			var/n2  = ST.air.get_moles(/datum/gas/nitrogen)
-			var/co2 = ST.air.get_moles(/datum/gas/carbon_dioxide)
+			var/tox = ST.air.get_moles(GAS_PLASMA)
+			var/oxy = ST.air.get_moles(GAS_O2)
+			var/n2  = ST.air.get_moles(GAS_N2)
+			var/co2 = ST.air.get_moles(GAS_CO2)
 
 			if(atmos_requirements["min_oxy"] && oxy < atmos_requirements["min_oxy"])
 				. = FALSE
@@ -345,11 +347,10 @@
 		remove_movespeed_modifier(/datum/movespeed_modifier/simplemob_varspeed)
 	add_or_update_variable_movespeed_modifier(/datum/movespeed_modifier/simplemob_varspeed, multiplicative_slowdown = speed)
 
-/mob/living/simple_animal/Stat()
-	..()
-	if(statpanel("Status"))
-		stat(null, "Health: [round((health / maxHealth) * 100)]%")
-		return 1
+/mob/living/simple_animal/get_status_tab_items()
+	. = ..()
+	. += ""
+	. += "Health: [round((health / maxHealth) * 100)]%"
 
 /mob/living/simple_animal/proc/drop_loot()
 	if(loot.len)
@@ -553,7 +554,7 @@
 	var/oindex = active_hand_index
 	active_hand_index = hand_index
 	if(hud_used)
-		var/obj/screen/inventory/hand/H
+		var/atom/movable/screen/inventory/hand/H
 		H = hud_used.hand_slots["[hand_index]"]
 		if(H)
 			H.update_icon()

@@ -1,5 +1,5 @@
 /**
-  * Called by SSmobs at (hopefully) an interval of 1 second.
+  * Called by SSmobs at an interval of 2 seconds.
   * Splits off into PhysicalLife() and BiologicalLife(). Override those instead of this.
   */
 /mob/living/proc/Life(seconds, times_fired)
@@ -24,7 +24,7 @@
 				break
 			var/msg = "[key_name_admin(src)] [ADMIN_JMP(src)] was found to have no .loc with an attached client, if the cause is unknown it would be wise to ask how this was accomplished."
 			message_admins(msg)
-			send2irc_adminless_only("Mob", msg, R_ADMIN)
+			INVOKE_ASYNC(GLOBAL_PROC, .proc/send2tgs_adminless_only, "Mob", msg, R_ADMIN)
 			log_game("[key_name(src)] was found to have no .loc with an attached client.")
 
 		// This is a temporary error tracker to make sure we've caught everything
@@ -43,6 +43,7 @@
   * Returns TRUE or FALSE based on if we were interrupted. This is used by overridden variants to check if they should stop.
   */
 /mob/living/proc/BiologicalLife(seconds, times_fired)
+	SEND_SIGNAL(src,COMSIG_LIVING_BIOLOGICAL_LIFE, seconds, times_fired)
 	handle_diseases()// DEAD check is in the proc itself; we want it to spread even if the mob is dead, but to handle its disease-y properties only if you're not.
 
 	handle_wounds()
@@ -78,6 +79,7 @@
   * Returns TRUE or FALSE based on if we were interrupted. This is used by overridden variants to check if they should stop.
   */
 /mob/living/proc/PhysicalLife(seconds, times_fired)
+	SEND_SIGNAL(src,COMSIG_LIVING_PHYSICAL_LIFE, seconds, times_fired)
 	if(digitalinvis)
 		handle_diginvis() //AI becomes unable to see mob
 
@@ -139,7 +141,7 @@
 		ExtinguishMob()
 		return
 	var/datum/gas_mixture/G = loc.return_air() // Check if we're standing in an oxygenless environment
-	if(!G.get_moles(/datum/gas/oxygen, 1))
+	if(!G.get_moles(GAS_O2, 1))
 		ExtinguishMob() //If there's no oxygen in the tile we're on, put out the fire
 		return
 	var/turf/location = get_turf(src)

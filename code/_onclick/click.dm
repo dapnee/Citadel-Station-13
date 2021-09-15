@@ -24,7 +24,7 @@
   * Common mob click code
   */
 /mob/proc/CommonClickOn(atom/A, params)
-	SHOULD_NOT_SLEEP(TRUE)
+	//SHOULD_NOT_SLEEP(TRUE)
 	if(mob_transforming)
 		return
 	if(SEND_SIGNAL(src, COMSIG_MOB_CLICKON, A, params) & COMSIG_MOB_CANCEL_CLICKON)
@@ -34,7 +34,7 @@
 		FlushCurrentAction()
 	else
 		DiscardCurrentAction()
-	
+
 /*
 	Standard mob ClickOn()
 	Handles exceptions: Buildmode, middle click, modified clicks, mech actions
@@ -49,7 +49,6 @@
 	* mob/RangedAttack(atom,params) - used only ranged, only used for tk and laser eyes but could be changed
 */
 /mob/proc/ClickOn(atom/A, params)
-	SHOULD_NOT_SLEEP(TRUE)
 	if(check_click_intercept(params,A))
 		return
 
@@ -64,6 +63,8 @@
 		return ShiftClickOn(A)
 	if(modifiers["alt"]) // alt and alt-gr (rightalt)
 		return AltClickOn(A)
+	if(modifiers["ctrl"] && modifiers["right"]) //CIT CHANGE - right click ctrl for a new form of dropping items
+		return CtrlRightClickOn(A, params) //CIT CHANGE
 	if(modifiers["ctrl"])
 		return CtrlClickOn(A)
 
@@ -289,9 +290,52 @@
 	return
 
 /atom/proc/ShiftClick(mob/user)
+	attempt_examinate(user)
+
+/atom/proc/attempt_examinate(mob/user)
 	var/flags = SEND_SIGNAL(src, COMSIG_CLICK_SHIFT, user) | SEND_SIGNAL(user, COMSIG_MOB_CLICKED_SHIFT_ON, src)
 	if(!(flags & COMPONENT_DENY_EXAMINATE) && user.client && (user.client.eye == user || user.client.eye == user.loc || flags & COMPONENT_ALLOW_EXAMINATE))
 		user.examinate(src)
+
+/*
+	Ctrl + Right click
+	Combat mode feature
+	Drop item in hand at position.
+*/
+/atom/proc/CtrlRightClickOn(atom/A, params)
+	if(isliving(src) && Adjacent(A)) //honestly only humans can do this given it's combat mode but if it's implemented for any other mobs...
+		var/mob/living/L = src
+		if(L.incapacitated())
+			return
+		var/obj/item/I = L.get_active_held_item()
+		var/turf/T = get_turf(A)
+		if(T)
+			if(I) //drop item at cursor.
+				if(T.density) //no, you can't use your funny blue cube or red cube to clip into the fucking wall.
+					return
+				for(var/atom/C in T.contents) //nor can you clip into a window or a door/false wall that's not open.
+					if(C.opacity || (((C.flags_1 & PREVENT_CLICK_UNDER_1) > 0) != (istype(C,/obj/machinery/door) && !C.density))) //XOR operation within because doors always have PREVENT_CLICK_UNDER_1 flag enabled. Dumb, I know.
+						return
+				if(L.transferItemToLoc(I, T))
+					var/list/click_params = params2list(params)
+					//Center the icon where the user clicked. (shamelessly stole code from tables)
+					if(!click_params || !click_params["icon-x"] || !click_params["icon-y"])
+						return
+					//Clamp it so that the icon never moves more than 16 pixels in either direction
+					I.pixel_x = clamp(text2num(click_params["icon-x"]) - 16, -(world.icon_size/2), world.icon_size/2)
+					I.pixel_y = clamp(text2num(click_params["icon-y"]) - 16, -(world.icon_size/2), world.icon_size/2)
+					return TRUE
+			else if(isitem(A) && L.has_active_hand()) //if they have an open hand they'll rotate the item instead.
+				var/obj/item/I2 = A
+				if(!I2.anchored)
+					var/matrix/ntransform = matrix(I2.transform)
+					ntransform.Turn(15)
+					animate(I2, transform = ntransform, time = 2)
+					return TRUE
+			else
+				A.CtrlClick(src)
+
+
 
 /*
 	Ctrl click
@@ -319,20 +363,13 @@
 		return ..()
 /*
 	Alt click
-	Unused except for AI
+	Used as an alternate way to interact with things.
 */
 /mob/proc/AltClickOn(atom/A)
-	if(!A.AltClick(src))
-		altclick_listed_turf(A)
-
-/mob/proc/altclick_listed_turf(atom/A)
-	var/turf/T = get_turf(A)
-	if(T == A.loc || T == A)
-		if(T == listed_turf)
-			listed_turf = null
-		else if(TurfAdjacent(T))
-			listed_turf = T
-			client.statpanel = T.name
+	. = SEND_SIGNAL(src, COMSIG_MOB_ALTCLICKON, A)
+	if(. & COMSIG_MOB_CANCEL_CLICKON)
+		return
+	A.AltClick(src)
 
 /mob/living/carbon/AltClickOn(atom/A)
 	if(!stat && mind && iscarbon(A) && A != src)
@@ -344,7 +381,18 @@
 	..()
 
 /atom/proc/AltClick(mob/user)
-	. = SEND_SIGNAL(src, COMSIG_CLICK_ALT, user)
+	SEND_SIGNAL(src, COMSIG_CLICK_ALT, user)
+	var/turf/T = get_turf(src)
+	if(T && (isturf(loc) || isturf(src)) && user.TurfAdjacent(T))
+		user.listed_turf = T
+		user.client << output("[url_encode(json_encode(T.name))];", "statbrowser:create_listedturf")
+
+/// Use this instead of [/mob/proc/AltClickOn] where you only want turf content listing without additional atom alt-click interaction
+/atom/proc/AltClickNoInteract(mob/user, atom/A)
+	var/turf/T = get_turf(A)
+	if(T && user.TurfAdjacent(T))
+		user.listed_turf = T
+		user.client << output("[url_encode(json_encode(T.name))];", "statbrowser:create_listedturf")
 
 /mob/proc/TurfAdjacent(turf/T)
 	return T.Adjacent(src)
@@ -423,14 +471,14 @@
 			setDir(WEST, ismousemovement)
 
 //debug
-/obj/screen/proc/scale_to(x1,y1)
+/atom/movable/screen/proc/scale_to(x1,y1)
 	if(!y1)
 		y1 = x1
 	var/matrix/M = new
 	M.Scale(x1,y1)
 	transform = M
 
-/obj/screen/click_catcher
+/atom/movable/screen/click_catcher
 	icon = 'icons/mob/screen_gen.dmi'
 	icon_state = "catcher"
 	plane = CLICKCATCHER_PLANE
@@ -440,7 +488,7 @@
 #define MAX_SAFE_BYOND_ICON_SCALE_TILES (MAX_SAFE_BYOND_ICON_SCALE_PX / world.icon_size)
 #define MAX_SAFE_BYOND_ICON_SCALE_PX (33 * 32)			//Not using world.icon_size on purpose.
 
-/obj/screen/click_catcher/proc/UpdateGreed(view_size_x = 15, view_size_y = 15)
+/atom/movable/screen/click_catcher/proc/UpdateGreed(view_size_x = 15, view_size_y = 15)
 	var/icon/newicon = icon('icons/mob/screen_gen.dmi', "catcher")
 	var/ox = min(MAX_SAFE_BYOND_ICON_SCALE_TILES, view_size_x)
 	var/oy = min(MAX_SAFE_BYOND_ICON_SCALE_TILES, view_size_y)
@@ -455,7 +503,7 @@
 	M.Scale(px/sx, py/sy)
 	transform = M
 
-/obj/screen/click_catcher/Click(location, control, params)
+/atom/movable/screen/click_catcher/Click(location, control, params)
 	var/list/modifiers = params2list(params)
 	if(modifiers["middle"] && iscarbon(usr))
 		var/mob/living/carbon/C = usr

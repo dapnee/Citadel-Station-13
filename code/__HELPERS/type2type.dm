@@ -78,21 +78,21 @@
 //Turns a direction into text
 /proc/dir2text(direction)
 	switch(direction)
-		if(1)
+		if(NORTH)
 			return "north"
-		if(2)
+		if(SOUTH)
 			return "south"
-		if(4)
+		if(EAST)
 			return "east"
-		if(8)
+		if(WEST)
 			return "west"
-		if(5)
+		if(NORTHEAST)
 			return "northeast"
-		if(6)
+		if(SOUTHEAST)
 			return "southeast"
-		if(9)
+		if(NORTHWEST)
 			return "northwest"
-		if(10)
+		if(SOUTHWEST)
 			return "southwest"
 		else
 	return
@@ -101,21 +101,21 @@
 /proc/text2dir(direction)
 	switch(uppertext(direction))
 		if("NORTH")
-			return 1
+			return NORTH
 		if("SOUTH")
-			return 2
+			return SOUTH
 		if("EAST")
-			return 4
+			return EAST
 		if("WEST")
-			return 8
+			return WEST
 		if("NORTHEAST")
-			return 5
+			return NORTHEAST
 		if("NORTHWEST")
-			return 9
+			return NORTHWEST
 		if("SOUTHEAST")
-			return 6
+			return SOUTHEAST
 		if("SOUTHWEST")
-			return 10
+			return SOUTHWEST
 		else
 	return
 
@@ -225,6 +225,8 @@
 		. += "[seperator]AUTOLOGIN"
 	if(rights & R_DBRANKS)
 		. += "[seperator]DBRANKS"
+	if(rights & R_SENSITIVE)
+		. += "[seperator]SENSITIVE"
 	if(!.)
 		. = "NONE"
 	return .
@@ -462,16 +464,14 @@
 		else
 			. = max(0, min(255, 138.5177312231 * log(temp - 10) - 305.0447927307))
 
-/proc/fusionpower2text(power) //used when displaying fusion power on analyzers
-	switch(power)
-		if(0 to 5)
-			return "low"
-		if(5 to 20)
-			return "mid"
-		if(20 to 50)
-			return "high"
-		if(50 to INFINITY)
-			return "super"
+/proc/instability2text(instability) //used when displaying fusion power on analyzers
+	switch(instability)
+		if(0 to 2)
+			return "stable, meaning that its heat will always increase."
+		if(2 to 3)
+			return "metastable, meaning that its heat will trend upwards."
+		if (3 to INFINITY)
+			return "unstable, meaning that its heat will trend downwards."
 
 /proc/color2hex(color)	//web colors
 	if(!color)
@@ -619,6 +619,12 @@
 			return "turf"
 		else //regex everything else (works for /proc too)
 			return lowertext(replacetext("[the_type]", "[type2parent(the_type)]/", ""))
+
+
+/// Return html to load a url.
+/// for use inside of browse() calls to html assets that might be loaded on a cdn.
+/proc/url2htmlloader(url)
+	return {"<html><head><meta http-equiv="refresh" content="0;URL='[url]'"/></head><body onLoad="parent.location='[url]'"></body></html>"}
 
 /proc/strtohex(str)
 	if(!istext(str)||!str)

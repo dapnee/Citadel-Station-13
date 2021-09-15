@@ -15,6 +15,7 @@
 	exp_requirements = 180
 	exp_type = EXP_TYPE_CREW
 	exp_type_department = EXP_TYPE_ENGINEERING
+	considered_combat_role = TRUE
 
 	outfit = /datum/outfit/job/ce
 	plasma_outfit = /datum/outfit/plasmaman/ce
@@ -53,7 +54,7 @@
 	backpack = /obj/item/storage/backpack/industrial
 	satchel = /obj/item/storage/backpack/satchel/eng
 	duffelbag = /obj/item/storage/backpack/duffelbag/engineering
-	box = /obj/item/storage/box/engineer
+	box = /obj/item/storage/box/survival/engineer
 	pda_slot = SLOT_L_STORE
 	chameleon_extras = /obj/item/stamp/ce
 

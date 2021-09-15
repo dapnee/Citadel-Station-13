@@ -7,6 +7,9 @@
 		////////////////
 		//ADMIN THINGS//
 		////////////////
+	/// hides the byond verb panel as we use our own custom version
+	show_verb_panel = FALSE
+	///Contains admin info. Null if client is not an admin.
 	var/datum/admins/holder = null
 	var/datum/click_intercept = null // Needs to implement InterceptClickOn(user,params,atom) proc
 	var/AI_Interact		= 0
@@ -28,6 +31,7 @@
 	var/datum/preferences/prefs = null
 	var/last_turn = 0
 	var/move_delay = 0
+	var/last_move = 0
 	var/area			= null
 
 	/// Last time we Click()ed. No clicking twice in one tick!
@@ -56,7 +60,7 @@
 
 	preload_rsc = PRELOAD_RSC
 
-	var/obj/screen/click_catcher/void
+	var/atom/movable/screen/click_catcher/void
 
 	//These two vars are used to make a special mouse cursor, with a unique icon for clicking
 	var/mouse_up_icon = null
@@ -75,16 +79,19 @@
 
 	var/inprefs = FALSE
 	var/list/topiclimiter
+
+	///Used for limiting the rate of clicks sends by the client to avoid abuse
 	var/list/clicklimiter
 
-	var/datum/chatOutput/chatOutput
-
-	var/list/credits //lazy list of all credit object bound to this client
+	///lazy list of all credit object bound to this client
+	var/list/credits
 
 	var/datum/player_details/player_details //these persist between logins/logouts during the same round.
 
-	var/list/char_render_holders			//Should only be a key-value list of north/south/east/west = obj/screen.
+	var/list/char_render_holders			//Should only be a key-value list of north/south/east/west = atom/movable/screen.
 
+	/// Last time they used fix macros
+	var/last_macro_fix = 0
 	/// Keys currently held
 	var/list/keys_held = list()
 	/// These next two vars are to apply movement for keypresses and releases made while move delayed.
@@ -122,6 +129,22 @@
 
 	/// Messages currently seen by this client
 	var/list/seen_messages
+	/// viewsize datum for holding our view size
+	var/datum/viewData/view_size
+
+	/// our current tab
+	var/stat_tab
+
+	/// whether our browser is ready or not yet
+	var/statbrowser_ready = FALSE
+
+	/// list of all tabs
+	var/list/panel_tabs = list()
+
+	/// list of tabs containing spells and abilities
+	var/list/spell_tabs = list()
+	/// list of tabs containing verbs
+	var/list/verb_tabs = list()
 	///A lazy list of atoms we've examined in the last EXAMINE_MORE_TIME (default 1.5) seconds, so that we will call [atom/proc/examine_more()] instead of [atom/proc/examine()] on them when examining
 	var/list/recent_examines
 	///When was the last time we warned them about not cryoing without an ahelp, set to -5 minutes so that rounstart cryo still warns
@@ -141,6 +164,14 @@
 	var/parallax_layers_max = 3
 	var/parallax_animate_timer
 
+	/**
+	 * Assoc list with all the active maps - when a screen obj is added to
+	 * a map, it's put in here as well.
+	 *
+	 * Format: list(<mapname> = list(/atom/movable/screen))
+	 */
+	var/list/screen_maps = list()
+
 	// List of all asset filenames sent to this client by the asset cache, along with their assoicated md5s
 	var/list/sent_assets = list()
 	/// List of all completed blocking send jobs awaiting acknowledgement by send_asset
@@ -151,3 +182,8 @@
 
 	//world.time of when the crew manifest can be accessed
 	var/crew_manifest_delay
+
+	/// Should go in persistent round player data sometime. This tracks what items have already warned the user on pickup that they can block/parry.
+	var/list/block_parry_hinted = list()
+	/// moused over objects, currently capped at 7. this is awful, and should be replaced with a component to track it using signals for parrying at some point.
+	var/list/moused_over_objects = list()

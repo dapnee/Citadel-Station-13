@@ -141,7 +141,7 @@
 		update_icon()
 
 /obj/machinery/disposal/proc/can_stuff_mob_in(mob/living/target, mob/living/user, pushing = FALSE)
-	if(!pushing && !iscarbon(user) && !user.ventcrawler) //only carbon and ventcrawlers can climb into disposal by themselves.
+	if(!pushing && !iscarbon(user) && !(SEND_SIGNAL(user, COMSIG_CHECK_VENTCRAWL))) //only carbon and ventcrawlers can climb into disposal by themselves.
 		if(iscyborg(user))
 			var/mob/living/silicon/robot/borg = user
 			if (!borg.module || !borg.module.canDispose)
@@ -263,7 +263,7 @@
 	. = ..()
 	if(.)
 		return
-	for(var/obj/item/I in src_object)
+	for(var/obj/item/I in src_object.contents())
 		if(user.active_storage != src_object)
 			if(I.on_found(user))
 				return
@@ -401,12 +401,15 @@
 	//check for items in disposal - occupied light
 	if(contents.len > 0)
 		. += "dispover-full"
+		. += emissive_appearance(icon, "dispover-full", alpha = src.alpha)
 
 	//charging and ready light
 	if(pressure_charging)
 		. += "dispover-charge"
+		. += emissive_appearance(icon, "dispover-charge-glow", alpha = src.alpha)
 	else if(full_pressure)
 		. += "dispover-ready"
+		. += emissive_appearance(icon, "dispover-ready-glow", alpha = src.alpha)
 
 /obj/machinery/disposal/bin/proc/do_flush()
 	set waitfor = FALSE
@@ -462,7 +465,7 @@
 
 /obj/machinery/disposal/bin/get_remote_view_fullscreens(mob/user)
 	if(user.stat == DEAD || !(user.sight & (SEEOBJS|SEEMOBS)))
-		user.overlay_fullscreen("remote_view", /obj/screen/fullscreen/impaired, 2)
+		user.overlay_fullscreen("remote_view", /atom/movable/screen/fullscreen/impaired, 2)
 
 //Delivery Chute
 

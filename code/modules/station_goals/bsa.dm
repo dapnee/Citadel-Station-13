@@ -31,6 +31,7 @@
 	anchored = TRUE
 
 /obj/machinery/bsa/wrench_act(mob/living/user, obj/item/I)
+	..()
 	default_unfasten_wrench(user, I, 10)
 	return TRUE
 
@@ -40,9 +41,8 @@
 	icon_state = "power_box"
 
 /obj/machinery/bsa/back/multitool_act(mob/living/user, obj/item/I)
-	if(istype(I, /obj/item/multitool)) // Only this multitool type has a data buffer.
-		var/obj/item/multitool/M = I
-		M.buffer = src
+	if(I.tool_behaviour == TOOL_MULTITOOL) // Lies and deception
+		I.buffer = src
 		to_chat(user, "<span class='notice'>You store linkage information in [I]'s buffer.</span>")
 	else
 		to_chat(user, "<span class='warning'>[I] has no data buffer!</span>")
@@ -54,9 +54,8 @@
 	icon_state = "emitter_center"
 
 /obj/machinery/bsa/front/multitool_act(mob/living/user, obj/item/I)
-	if(istype(I, /obj/item/multitool)) // Only this multitool type has a data buffer.
-		var/obj/item/multitool/M = I
-		M.buffer = src
+	if(I.tool_behaviour == TOOL_MULTITOOL) // Lies and deception
+		I.buffer = src
 		to_chat(user, "<span class='notice'>You store linkage information in [I]'s buffer.</span>")
 	else
 		to_chat(user, "<span class='warning'>[I] has no data buffer!</span>")
@@ -70,16 +69,15 @@
 	var/obj/machinery/bsa/front/front
 
 /obj/machinery/bsa/middle/multitool_act(mob/living/user, obj/item/I)
-	if(istype(I, /obj/item/multitool)) // Only this multitool type has a data buffer.
-		var/obj/item/multitool/M = I
-		if(M.buffer)
-			if(istype(M.buffer, /obj/machinery/bsa/back))
-				back = M.buffer
-				M.buffer = null
+	if(I.tool_behaviour == TOOL_MULTITOOL) // Lies and deception
+		if(I.buffer)
+			if(istype(I.buffer, /obj/machinery/bsa/back))
+				back = I.buffer
+				I.buffer = null
 				to_chat(user, "<span class='notice'>You link [src] with [back].</span>")
-			else if(istype(M.buffer, /obj/machinery/bsa/front))
-				front = M.buffer
-				M.buffer = null
+			else if(istype(I.buffer, /obj/machinery/bsa/front))
+				front = I.buffer
+				I.buffer = null
 				to_chat(user, "<span class='notice'>You link [src] with [front].</span>")
 		else
 			to_chat(user, "<span class='warning'>[I]'s data buffer is empty!</span>")
@@ -142,17 +140,17 @@
 /obj/machinery/bsa/full/proc/get_front_turf()
 	switch(dir)
 		if(WEST)
-			return locate(x - 6,y,z)
+			return locate(x - 7,y,z)
 		if(EAST)
-			return locate(x + 4,y,z)
+			return locate(x + 7,y,z)
 	return get_turf(src)
 
 /obj/machinery/bsa/full/proc/get_back_turf()
 	switch(dir)
 		if(WEST)
-			return locate(x + 4,y,z)
+			return locate(x + 5,y,z)
 		if(EAST)
-			return locate(x - 6,y,z)
+			return locate(x - 5,y,z)
 	return get_turf(src)
 
 /obj/machinery/bsa/full/proc/get_target_turf()
@@ -169,11 +167,12 @@
 	switch(cannon_direction)
 		if(WEST)
 			setDir(WEST)
-			pixel_x = -192
 			top_layer.icon_state = "top_west"
 			icon_state = "cannon_west"
 		if(EAST)
 			setDir(EAST)
+			pixel_x = -128
+			bound_x = -128
 			top_layer.icon_state = "top_east"
 			icon_state = "cannon_east"
 	add_overlay(top_layer)
@@ -210,6 +209,7 @@
 	else
 		message_admins("[ADMIN_LOOKUPFLW(user)] has launched an artillery strike targeting [ADMIN_VERBOSEJMP(bullseye)] but it was blocked by [blocker] at [ADMIN_VERBOSEJMP(target)].")
 		log_game("[key_name(user)] has launched an artillery strike targeting [AREACOORD(bullseye)] but it was blocked by [blocker] at [AREACOORD(target)].")
+
 
 /obj/machinery/bsa/full/proc/reload()
 	ready = FALSE
@@ -293,15 +293,16 @@
 /obj/machinery/computer/bsa_control/proc/get_target_name()
 	if(istype(target, /area))
 		return get_area_name(target, TRUE)
-	else if(istype(target, /obj/item/gps))
-		var/obj/item/gps/G = target
+	else if(istype(target, /datum/component/gps))
+		var/datum/component/gps/G = target
 		return G.gpstag
 
 /obj/machinery/computer/bsa_control/proc/get_impact_turf()
 	if(istype(target, /area))
 		return pick(get_area_turfs(target))
-	else if(istype(target, /obj/item/gps))
-		return get_turf(target)
+	else if(istype(target, /datum/component/gps))
+		var/datum/component/gps/G = target
+		return get_turf(G.parent)
 
 /obj/machinery/computer/bsa_control/proc/fire(mob/user)
 	if(cannon.stat)

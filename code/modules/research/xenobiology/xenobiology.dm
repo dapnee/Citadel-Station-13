@@ -187,7 +187,7 @@
 	switch(activation_type)
 		if(SLIME_ACTIVATE_MINOR)
 			user.adjust_nutrition(50)
-			user.blood_volume += 50
+			user.adjust_integration_blood(50)
 			to_chat(user, "<span class='notice'>You activate [src], and your body is refilled with fresh slime jelly!</span>")
 			return 150
 
@@ -258,7 +258,7 @@
 		if(SLIME_ACTIVATE_MAJOR)
 			user.visible_message("<span class='warning'>[user]'s skin starts flashing intermittently...</span>", "<span class='warning'>Your skin starts flashing intermittently...</span>")
 			if(do_after(user, 25, target = user))
-				empulse(user, 1, 2)
+				empulse_using_range(user, 3)
 				user.visible_message("<span class='warning'>[user]'s skin flashes!</span>", "<span class='warning'>Your skin flashes as you emit an electromagnetic pulse!</span>")
 				return 600
 

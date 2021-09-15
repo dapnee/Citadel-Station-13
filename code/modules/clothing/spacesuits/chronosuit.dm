@@ -62,13 +62,12 @@
 	if(. & EMP_PROTECT_SELF)
 		return
 	var/mob/living/carbon/human/user = src.loc
-	switch(severity)
-		if(1)
-			if(activated && user && ishuman(user) && (user.wear_suit == src))
-				to_chat(user, "<span class='danger'>E:FATAL:RAM_READ_FAIL\nE:FATAL:STACK_EMPTY\nE:FATAL:READ_NULL_POINT\nE:FATAL:PWR_BUS_OVERLOAD</span>")
-				to_chat(user, "<span class='userdanger'>An electromagnetic pulse disrupts your [name] and violently tears you out of time-bluespace!</span>")
-				user.emote("scream")
-			deactivate(1, 1)
+	if(severity >= 70)
+		if(activated && user && ishuman(user) && (user.wear_suit == src))
+			to_chat(user, "<span class='danger'>E:FATAL:RAM_READ_FAIL\nE:FATAL:STACK_EMPTY\nE:FATAL:READ_NULL_POINT\nE:FATAL:PWR_BUS_OVERLOAD</span>")
+			to_chat(user, "<span class='userdanger'>An electromagnetic pulse disrupts your [name] and violently tears you out of time-bluespace!</span>")
+			user.emote("scream")
+		deactivate(1, 1)
 
 /obj/item/clothing/suit/space/chronos/proc/finish_chronowalk(mob/living/carbon/human/user, turf/to_turf)
 	if(!user)
@@ -239,7 +238,7 @@
 	var/mob/holder = null
 	var/phase_time = 0
 	var/phase_time_length = 3
-	var/obj/screen/chronos_target/target_ui = null
+	var/atom/movable/screen/chronos_target/target_ui = null
 	var/obj/item/clothing/suit/space/chronos/chronosuit
 
 /obj/effect/chronos_cam/singularity_act()
@@ -300,13 +299,13 @@
 			holder.unset_machine()
 	return ..()
 
-/obj/screen/chronos_target
+/atom/movable/screen/chronos_target
 	name = "target display"
 	screen_loc = "CENTER,CENTER"
 	color = "#ff3311"
 	blend_mode = BLEND_SUBTRACT
 
-/obj/screen/chronos_target/New(loc, var/mob/living/carbon/human/user)
+/atom/movable/screen/chronos_target/New(loc, var/mob/living/carbon/human/user)
 	if(user)
 		var/icon/user_icon = getFlatIcon(user)
 		icon = user_icon

@@ -163,7 +163,7 @@
 	timeout = 3 MINUTES
 
 /datum/mood_event/gates_of_mansus
-	description = "<span class='boldwarning'>LIVING IN A PERFORMANCE IS WORSE THAN DEATH</span>\n"
+	description = "<span class='boldwarning'>I HAD A GLIMPSE OF THE HORROR BEYOND THIS WORLD. REALITY UNCOILED BEFORE MY EYES!</span>\n"
 	mood_change = -25
 	timeout = 4 MINUTES
 
@@ -202,6 +202,11 @@
 /datum/mood_event/plush_nostuffing
 	description = "<span class='warning'>A plush I tried to pet had no stuffing...</span>\n"
 	mood_change = -1
+	timeout = 2 MINUTES
+
+/datum/mood_event/plush_bite
+	description = "<span class='warning'>IT BIT ME!! OW!</span>\n"
+	mood_change = -3
 	timeout = 2 MINUTES
 
 //Cursed stuff below

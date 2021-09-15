@@ -97,7 +97,7 @@
 	if(!status)
 		return
 	if(!(. & EMP_PROTECT_SELF))
-		if(prob(150/severity))
+		if(prob(severity/0.7))
 			update_icon()
 			var/list/previous_network = network
 			network = list()
@@ -407,7 +407,7 @@
 
 /obj/machinery/camera/get_remote_view_fullscreens(mob/user)
 	if(view_range == short_range) //unfocused
-		user.overlay_fullscreen("remote_view", /obj/screen/fullscreen/impaired, 2)
+		user.overlay_fullscreen("remote_view", /atom/movable/screen/fullscreen/impaired, 2)
 
 /obj/machinery/camera/update_remote_sight(mob/living/user)
 	user.see_invisible = SEE_INVISIBLE_LIVING //can't see ghosts through cameras

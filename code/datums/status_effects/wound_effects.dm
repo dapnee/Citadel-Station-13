@@ -1,13 +1,13 @@
 
 // The shattered remnants of your broken limbs fill you with determination!
-/obj/screen/alert/status_effect/determined
+/atom/movable/screen/alert/status_effect/determined
 	name = "Determined"
 	desc = "The serious wounds you've sustained have put your body into fight-or-flight mode! Now's the time to look for an exit!"
 	icon_state = "regenerative_core"
 
 /datum/status_effect/determined
 	id = "determined"
-	alert_type = /obj/screen/alert/status_effect/determined
+	alert_type = /atom/movable/screen/alert/status_effect/determined
 
 /datum/status_effect/determined/on_apply()
 	. = ..()
@@ -21,7 +21,7 @@
 	id = "limp"
 	status_type = STATUS_EFFECT_REPLACE
 	tick_interval = 10
-	alert_type = /obj/screen/alert/status_effect/limp
+	alert_type = /atom/movable/screen/alert/status_effect/limp
 	var/msg_stage = 0//so you dont get the most intense messages immediately
 	/// The left leg of the limping person
 	var/obj/item/bodypart/l_leg/left
@@ -49,7 +49,7 @@
 	UnregisterSignal(owner, list(COMSIG_MOVABLE_MOVED, COMSIG_CARBON_GAIN_WOUND, COMSIG_CARBON_LOSE_WOUND, COMSIG_CARBON_ATTACH_LIMB, COMSIG_CARBON_REMOVE_LIMB))
 	return ..()
 
-/obj/screen/alert/status_effect/limp
+/atom/movable/screen/alert/status_effect/limp
 	name = "Limping"
 	desc = "One or more of your legs has been wounded, slowing down steps with that leg! Get it fixed, or at least splinted!"
 
@@ -99,11 +99,11 @@
 /////////////////////////
 
 // wound alert
-/obj/screen/alert/status_effect/wound
+/atom/movable/screen/alert/status_effect/wound
 	name = "Wounded"
 	desc = "Your body has sustained serious damage, click here to inspect yourself."
 
-/obj/screen/alert/status_effect/wound/Click()
+/atom/movable/screen/alert/status_effect/wound/Click()
 	var/mob/living/carbon/C = usr
 	C.check_self_for_injuries()
 
@@ -141,22 +141,23 @@
 // bones
 /datum/status_effect/wound/blunt
 
-/datum/status_effect/wound/blunt/interact_speed_modifier()
-	var/mob/living/carbon/C = owner
+/datum/status_effect/wound/blunt/on_apply()
+	. = ..()
+	RegisterSignal(owner, COMSIG_MOB_SWAP_HANDS, .proc/on_swap_hands)
+	on_swap_hands()
 
-	if(C.get_active_hand() == linked_limb)
-		to_chat(C, "<span class='warning'>The [lowertext(linked_wound)] in your [linked_limb.name] slows your progress!</span>")
-		return linked_wound.interaction_efficiency_penalty
+/datum/status_effect/wound/blunt/on_remove()
+	. = ..()
+	UnregisterSignal(owner, COMSIG_MOB_SWAP_HANDS)
+	var/mob/living/carbon/wound_owner = owner
+	wound_owner.remove_actionspeed_modifier(/datum/actionspeed_modifier/blunt_wound)
 
-	return 1
-
-/datum/status_effect/wound/blunt/action_cooldown_mod()
-	var/mob/living/carbon/C = owner
-
-	if(C.get_active_hand() == linked_limb)
-		return linked_wound.interaction_efficiency_penalty
-
-	return 1
+/datum/status_effect/wound/blunt/proc/on_swap_hands()
+	var/mob/living/carbon/wound_owner = owner
+	if(wound_owner.get_active_hand() == linked_limb)
+		wound_owner.add_actionspeed_modifier(/datum/actionspeed_modifier/blunt_wound, (linked_wound.interaction_efficiency_penalty - 1))
+	else
+		wound_owner.remove_actionspeed_modifier(/datum/actionspeed_modifier/blunt_wound)
 
 /datum/status_effect/wound/blunt/moderate
 	id = "disjoint"

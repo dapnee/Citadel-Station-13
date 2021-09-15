@@ -174,7 +174,14 @@
 		new reward(get_turf(src))
 		to_chat(user, "<span class='cultitalic'>You work the forge as dark knowledge guides your hands, creating the [choice]!</span>")
 
-
+/obj/structure/destructible/cult/forge/attackby(obj/item/I, mob/user)
+	if(!iscultist(user))
+		to_chat(user, "<span class='warning'>The heat radiating from [src] pushes you back.</span>")
+		return
+	if(istype(I, /obj/item/ingot))
+		var/obj/item/ingot/notsword = I
+		to_chat(user, "You heat the [notsword] in the [src].")
+		notsword.workability = "shapeable"
 
 /obj/structure/destructible/cult/pylon
 	name = "pylon"
@@ -197,26 +204,31 @@
 	STOP_PROCESSING(SSfastprocess, src)
 	return ..()
 
+/obj/structure/destructible/cult/pylon/proc/heal_friends()
+	set waitfor = FALSE
+	for(var/mob/living/L in range(5, src))
+		if(iscultist(L) || isshade(L) || isconstruct(L))
+			if(L.health != L.maxHealth)
+				new /obj/effect/temp_visual/heal(get_turf(src), "#960000")
+				if(ishuman(L))
+					L.adjustBruteLoss(-1, 0, only_organic = FALSE)
+					L.adjustFireLoss(-1, 0, only_organic = FALSE)
+					L.updatehealth()
+				if(isshade(L) || isconstruct(L))
+					var/mob/living/simple_animal/M = L
+					if(M.health < M.maxHealth)
+						M.adjustHealth(-3)
+			if(ishuman(L) && L.blood_volume < (BLOOD_VOLUME_NORMAL * L.blood_ratio))
+				L.adjust_integration_blood(1.0)
+		CHECK_TICK
+
+
 /obj/structure/destructible/cult/pylon/process()
 	if(!anchored)
 		return
 	if(last_heal <= world.time)
 		last_heal = world.time + heal_delay
-		for(var/mob/living/L in range(5, src))
-			if(iscultist(L) || isshade(L) || isconstruct(L))
-				if(L.health != L.maxHealth)
-					new /obj/effect/temp_visual/heal(get_turf(src), "#960000")
-					if(ishuman(L))
-						L.adjustBruteLoss(-1, 0)
-						L.adjustFireLoss(-1, 0)
-						L.updatehealth()
-					if(isshade(L) || isconstruct(L))
-						var/mob/living/simple_animal/M = L
-						if(M.health < M.maxHealth)
-							M.adjustHealth(-3)
-				if(ishuman(L) && L.blood_volume < (BLOOD_VOLUME_NORMAL * L.blood_ratio))
-					L.blood_volume += 1.0
-			CHECK_TICK
+		heal_friends()
 	if(last_corrupt <= world.time)
 		var/list/validturfs = list()
 		var/list/cultturfs = list()

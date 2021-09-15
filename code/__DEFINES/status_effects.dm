@@ -30,6 +30,8 @@
 
 #define STATUS_EFFECT_FLESHMEND /datum/status_effect/fleshmend //Very fast healing; suppressed by fire, and heals less fire damage
 
+#define STATUS_EFFECT_PANACEA /datum/status_effect/panacea //Anatomic panacea that directly heals, rather than injecting a small chemical cocktail
+
 #define STATUS_EFFECT_EXERCISED /datum/status_effect/exercised //Prevents heart disease
 
 #define STATUS_EFFECT_HIPPOCRATIC_OATH /datum/status_effect/hippocraticOath //Gives you an aura of healing as well as regrowing the Rod of Asclepius if lost
@@ -37,6 +39,9 @@
 #define STATUS_EFFECT_REGENERATIVE_CORE /datum/status_effect/regenerative_core	//removes damage slowdown while giving a slow regenerating effect
 
 #define STATUS_EFFECT_DETERMINED /datum/status_effect/determined //currently in a combat high from being seriously wounded
+
+#define STATUS_EFFECT_MANTRA /datum/status_effect/mantra // a toggled self buff that makes you stronger and more resilient, but drains stamina over time
+#define STATUS_EFFECT_ASURA /datum/status_effect/asura // like a weaker version of mantra, drains HP instead of stamina and has no armor
 
 /////////////
 // DEBUFFS //
@@ -100,11 +105,8 @@
 
 #define STATUS_EFFECT_FAKE_VIRUS /datum/status_effect/fake_virus //gives you fluff messages for cough, sneeze, headache, etc but without an actual virus
 
-#define STATUS_EFFECT_BREASTS_ENLARGEMENT /datum/status_effect/chem/breast_enlarger //Applied slowdown due to the ominous bulk.
+#define STATUS_EFFECT_STASIS /datum/status_effect/grouped/stasis //Halts biological functions like bleeding, chemical processing, blood regeneration, walking, etc
 
-#define STATUS_EFFECT_PENIS_ENLARGEMENT /datum/status_effect/chem/penis_enlarger //More applied slowdown, just like the above.
-
-#define STATUS_EFFECT_NO_COMBAT_MODE /datum/status_effect/no_combat_mode //Wont allow combat mode and will disable it
 #define STATUS_EFFECT_MESMERIZE /datum/status_effect/mesmerize //Just reskinned no_combat_mode
 
 #define STATUS_EFFECT_ELECTROSTAFF /datum/status_effect/electrostaff		//slows down victim
@@ -137,3 +139,9 @@
 #define STATUS_EFFECT_RAINBOWPROTECTION /datum/status_effect/rainbow_protection //Invulnerable and pacifistic
 #define STATUS_EFFECT_SLIMESKIN /datum/status_effect/slimeskin //Increased armor
 #define STATUS_EFFECT_DNA_MELT /datum/status_effect/dna_melt //usually does something horrible to you when you hit 100 genetic instability
+
+/////////////
+// GROUPED //
+/////////////
+
+#define STASIS_ASCENSION_EFFECT "heretic_ascension"

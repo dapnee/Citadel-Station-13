@@ -28,7 +28,7 @@
 	if(skipface || get_visible_name() == "Unknown")
 		. += "You can't make out what species they are."
 	else
-		. += "[t_He] [t_is] a [dna.custom_species ? dna.custom_species : dna.species.name]!"
+		. += "[t_He] [t_is] a [spec_trait_examine_font()][dna.custom_species ? dna.custom_species : dna.species.name]</font>!"
 
 	//uniform
 	if(w_uniform && !(SLOT_W_UNIFORM in obscured))
@@ -41,10 +41,10 @@
 
 		. += "[t_He] [t_is] wearing [w_uniform.get_examine_string(user)][accessory_msg]."
 	//head
-	if(head)
+	if(head && !(head.obj_flags & EXAMINE_SKIP))
 		. += "[t_He] [t_is] wearing [head.get_examine_string(user)] on [t_his] head."
 	//suit/armor
-	if(wear_suit)
+	if(wear_suit && !(wear_suit.obj_flags & EXAMINE_SKIP))
 		. += "[t_He] [t_is] wearing [wear_suit.get_examine_string(user)]."
 		//suit/armor storage
 		if(s_store && !(SLOT_S_STORE in obscured))
@@ -92,7 +92,7 @@
 	if(!(SLOT_GLASSES in obscured))
 		if(glasses)
 			. += "[t_He] [t_has] [glasses.get_examine_string(user)] covering [t_his] eyes."
-		else if(eye_color == BLOODCULT_EYE && iscultist(src) && HAS_TRAIT(src, TRAIT_CULT_EYES))
+		else if((left_eye_color == BLOODCULT_EYE || right_eye_color == BLOODCULT_EYE) && iscultist(src) && HAS_TRAIT(src, TRAIT_CULT_EYES))
 			. += "<span class='warning'><B>[t_His] eyes are glowing an unnatural red!</B></span>"
 		else if(HAS_TRAIT(src, TRAIT_HIJACKER))
 			var/obj/item/implant/hijack/H = user.getImplant(/obj/item/implant/hijack)
@@ -113,14 +113,14 @@
 		. += effects_exam
 
 	//CIT CHANGES START HERE - adds genital details to examine text
-	if(LAZYLEN(internal_organs))
+	if(LAZYLEN(internal_organs) && CHECK_BITFIELD(user.client?.prefs.cit_toggles, GENITAL_EXAMINE))
 		for(var/obj/item/organ/genital/dicc in internal_organs)
 			if(istype(dicc) && dicc.is_exposed())
 				. += "[dicc.desc]"
-
-	var/cursed_stuff = attempt_vr(src,"examine_bellies",args) //vore Code
-	if(cursed_stuff)
-		. += cursed_stuff
+	if(CHECK_BITFIELD(user.client?.prefs.cit_toggles, VORE_EXAMINE))
+		var/cursed_stuff = attempt_vr(src,"examine_bellies",args) //vore Code
+		if(cursed_stuff)
+			. += cursed_stuff
 //END OF CIT CHANGES
 
 	//Jitters

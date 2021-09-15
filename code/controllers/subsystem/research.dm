@@ -294,6 +294,17 @@ SUBSYSTEM_DEF(research)
 	//[88nodes * 5000points/node] / [1.5hr * 90min/hr * 60s/min]
 	//Around 450000 points max???
 
+	/// The global list of raw anomaly types that have been refined, for hard limits.
+	var/list/created_anomaly_types = list()
+	/// The hard limits of cores created for each anomaly type. For faster code lookup without switch statements.
+	var/list/anomaly_hard_limit_by_type = list(
+	ANOMALY_CORE_BLUESPACE = MAX_CORES_BLUESPACE,
+	ANOMALY_CORE_PYRO = MAX_CORES_PYRO,
+	ANOMALY_CORE_GRAVITATIONAL = MAX_CORES_GRAVITATIONAL,
+	ANOMALY_CORE_VORTEX = MAX_CORES_VORTEX,
+	ANOMALY_CORE_FLUX = MAX_CORES_FLUX
+	)
+
 /datum/controller/subsystem/research/Initialize()
 	point_types = TECHWEB_POINT_TYPE_LIST_ASSOCIATIVE_NAMES
 	initialize_all_techweb_designs()
@@ -355,10 +366,16 @@ SUBSYSTEM_DEF(research)
 			techweb_categories[I.category] = list(I.id = TRUE)
 
 /datum/controller/subsystem/research/proc/techweb_node_by_id(id)
-	return techweb_nodes[id] || error_node
+	if(techweb_nodes[id])
+		return techweb_nodes[id]
+	stack_trace("Attempted to access node ID [id] which didn't exist")
+	return error_node
 
 /datum/controller/subsystem/research/proc/techweb_design_by_id(id)
-	return techweb_designs[id] || error_design
+	if(techweb_designs[id])
+		return techweb_designs[id]
+	stack_trace("Attempted to access design ID [id] which didn't exist")
+	return error_design
 
 /datum/controller/subsystem/research/proc/on_design_deletion(datum/design/D)
 	for(var/i in techweb_nodes)
@@ -398,8 +415,7 @@ SUBSYSTEM_DEF(research)
 		var/datum/techweb_node/TN = techweb_nodes[id]
 		TN.Initialize()
 	techweb_nodes = returned
-	if (!verify_techweb_nodes())	//Verify all nodes have ids and such.
-		stack_trace("Invalid techweb nodes detected")
+	verify_techweb_nodes()
 	calculate_techweb_nodes()
 	calculate_techweb_boost_list()
 	if (!verify_techweb_nodes())		//Verify nodes and designs have been crosslinked properly.
@@ -431,52 +447,52 @@ SUBSYSTEM_DEF(research)
 	for(var/n in techweb_nodes)
 		var/datum/techweb_node/N = techweb_nodes[n]
 		if(!istype(N))
-			WARNING("Invalid research node with ID [n] detected and removed.")
+			stack_trace("Invalid research node with ID [n] detected and removed.")
 			techweb_nodes -= n
 			research_node_id_error(n)
 			. = FALSE
 		for(var/p in N.prereq_ids)
 			var/datum/techweb_node/P = techweb_nodes[p]
 			if(!istype(P))
-				WARNING("Invalid research prerequisite node with ID [p] detected in node [N.display_name]\[[N.id]\] removed.")
+				stack_trace("Invalid research prerequisite node with ID [p] detected in node [N.display_name]\[[N.id]\] removed.")
 				N.prereq_ids  -= p
 				research_node_id_error(p)
 				. = FALSE
 		for(var/d in N.design_ids)
 			var/datum/design/D = techweb_designs[d]
 			if(!istype(D))
-				WARNING("Invalid research design with ID [d] detected in node [N.display_name]\[[N.id]\] removed.")
+				stack_trace("Invalid research design with ID [d] detected in node [N.display_name]\[[N.id]\] removed.")
 				N.design_ids -= d
 				design_id_error(d)
 				. = FALSE
 		for(var/u in N.unlock_ids)
 			var/datum/techweb_node/U = techweb_nodes[u]
 			if(!istype(U))
-				WARNING("Invalid research unlock node with ID [u] detected in node [N.display_name]\[[N.id]\] removed.")
+				stack_trace("Invalid research unlock node with ID [u] detected in node [N.display_name]\[[N.id]\] removed.")
 				N.unlock_ids -= u
 				research_node_id_error(u)
 				. = FALSE
 		for(var/p in N.boost_item_paths)
 			if(!ispath(p))
 				N.boost_item_paths -= p
-				WARNING("[p] is not a valid path.")
+				stack_trace("[p] is not a valid path.")
 				node_boost_error(N.id, "[p] is not a valid path.")
 				. = FALSE
 			var/list/points = N.boost_item_paths[p]
 			if(islist(points))
 				for(var/i in points)
 					if(!isnum(points[i]))
-						WARNING("[points[i]] is not a valid number.")
+						stack_trace("[points[i]] is not a valid number.")
 						node_boost_error(N.id, "[points[i]] is not a valid number.")
 						. = FALSE
 					else if(!point_types[i])
-						WARNING("[i] is not a valid point type.")
+						stack_trace("[i] is not a valid point type.")
 						node_boost_error(N.id, "[i] is not a valid point type.")
 						. = FALSE
 			else if(!isnull(points))
 				N.boost_item_paths -= p
 				node_boost_error(N.id, "No valid list.")
-				WARNING("No valid list.")
+				stack_trace("No valid list.")
 				. = FALSE
 		CHECK_TICK
 

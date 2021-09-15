@@ -26,6 +26,7 @@
 	wound_bonus = -110
 	bare_wound_bonus = 20
 	block_parry_data = /datum/block_parry_data/dual_esword
+	block_chance = 60
 	var/hacked = FALSE
 	/// Can this reflect all energy projectiles?
 	var/can_reflect = TRUE
@@ -38,8 +39,9 @@
 	var/wielded = FALSE // track wielded status on item
 	var/slowdown_wielded = 0
 
-/datum/block_parry_data/dual_esword
-	block_damage_absorption = 2
+/datum/block_parry_data/dual_esword // please run at the man going apeshit with his funny doublesword
+	can_block_directions = BLOCK_DIR_NORTH | BLOCK_DIR_NORTHEAST | BLOCK_DIR_NORTHWEST | BLOCK_DIR_WEST | BLOCK_DIR_EAST
+	block_damage_absorption = 5
 	block_damage_multiplier = 0.15
 	block_damage_multiplier_override = list(
 		ATTACK_TYPE_MELEE = 0.25
@@ -50,14 +52,14 @@
 	block_lock_sprinting = TRUE
 	// no attacking while blocking
 	block_lock_attacking = TRUE
-	block_projectile_mitigation = 75
+	block_projectile_mitigation = 85
 	// more efficient vs projectiles
 	block_stamina_efficiency_override = list(
-		TEXT_ATTACK_TYPE_PROJECTILE = 4
+		TEXT_ATTACK_TYPE_PROJECTILE = 6
 	)
 
 	parry_time_windup = 0
-	parry_time_active = 8
+	parry_time_active = 12
 	parry_time_spindown = 0
 	// we want to signal to players the most dangerous phase, the time when automatic counterattack is a thing.
 	parry_time_windup_visual_override = 1
@@ -67,12 +69,10 @@
 	parry_time_perfect = 2		// first ds isn't perfect
 	parry_time_perfect_leeway = 1
 	parry_imperfect_falloff_percent = 10
-	parry_efficiency_to_counterattack = 100
 	parry_efficiency_considered_successful = 25		// VERY generous
 	parry_failed_stagger_duration = 3 SECONDS
-	parry_failed_clickcd_duration = CLICK_CD_MELEE
 
-/obj/item/dualsaber/active_block(mob/living/owner, atom/object, damage, attack_text, attack_type, armour_penetration, mob/attacker, def_zone, final_block_chance, list/block_return, override_direction)
+/obj/item/dualsaber/directional_block(mob/living/owner, atom/object, damage, attack_text, attack_type, armour_penetration, mob/attacker, def_zone, final_block_chance, list/block_return, override_direction)
 	if((attack_type & ATTACK_TYPE_PROJECTILE) && is_energy_reflectable_projectile(object))
 		block_return[BLOCK_RETURN_REDIRECT_METHOD] = REDIRECT_METHOD_RETURN_TO_SENDER
 		return BLOCK_SUCCESS | BLOCK_REDIRECTED | BLOCK_SHOULD_REDIRECT
@@ -81,7 +81,7 @@
 /obj/item/dualsaber/on_active_parry(mob/living/owner, atom/object, damage, attack_text, attack_type, armour_penetration, mob/attacker, def_zone, list/block_return, parry_efficiency, parry_time)
 	. = ..()
 	if(parry_efficiency >= 90)		// perfect parry
-		block_return[BLOCK_RETURN_REDIRECT_METHOD] = REDIRECT_METHOD_RETURN_TO_SENDER
+		block_return[BLOCK_RETURN_REDIRECT_METHOD] = REDIRECT_METHOD_DEFLECT
 		. |= BLOCK_SHOULD_REDIRECT
 
 /obj/item/dualsaber/Initialize()
@@ -251,7 +251,7 @@
 	possible_colors = list("purple")
 
 /obj/item/dualsaber/attackby(obj/item/W, mob/user, params)
-	if(istype(W, /obj/item/multitool))
+	if(W.tool_behaviour == TOOL_MULTITOOL)
 		if(!hacked)
 			hacked = TRUE
 			to_chat(user, "<span class='warning'>2XRNBW_ENGAGE</span>")
@@ -367,14 +367,12 @@
 	parry_time_perfect = 1
 	parry_time_perfect_leeway = 1
 	parry_imperfect_falloff_percent = 7.5
-	parry_efficiency_to_counterattack = 100
 	parry_efficiency_considered_successful = 80
 	parry_efficiency_perfect = 120
 	parry_efficiency_perfect_override = list(
 		TEXT_ATTACK_TYPE_PROJECTILE = 30,
 	)
 	parry_failed_stagger_duration = 3 SECONDS
-	parry_failed_clickcd_duration = 2 SECONDS
 
 /obj/item/dualsaber/hypereutactic/chaplain/ComponentInitialize()
 	. = ..()
