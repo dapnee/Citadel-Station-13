@@ -14,8 +14,6 @@
 			candidates.Remove(P)
 		else if((exclusive_roles.len > 0) && !(P.mind.assigned_role in exclusive_roles)) // Is the rule exclusive to their job?
 			candidates.Remove(P)
-		else if(ROLE_NO_ANTAGONISM in P.client.prefs.be_special)
-			candidates.Remove(P)
 		else if(antag_flag_override)
 			if(!(HAS_ANTAG_PREF(P.client, antag_flag_override)))
 				candidates.Remove(P)
@@ -63,7 +61,7 @@
 	required_candidates = 1
 	weight = 7
 	cost = 5
-	requirements = list(40,30,20,10,10,10,10,10,10,10)
+	requirements = list(101,40,25,20,15,10,10,10,10,10)
 	repeatable = TRUE
 
 //////////////////////////////////////////////
@@ -159,5 +157,5 @@
 	required_candidates = 1
 	weight = 4
 	cost = 10
-	requirements = list(101,101,101,50,40,10,10,10,10,10)
+	requirements = list(101,101,101,50,40,20,20,15,10,10)
 	repeatable = TRUE

@@ -1,7 +1,7 @@
 /datum/job/warden
 	title = "Warden"
 	flag = WARDEN
-//	auto_deadmin_role_flags = DEADMIN_POSITION_SECURITY
+	auto_deadmin_role_flags = DEADMIN_POSITION_SECURITY
 	department_head = list("Head of Security")
 	department_flag = ENGSEC
 	faction = "Station"
@@ -22,12 +22,17 @@
 
 	paycheck = PAYCHECK_HARD
 	paycheck_department = ACCOUNT_SEC
+	bounty_types = CIV_JOB_SEC
 
 	mind_traits = list(TRAIT_LAW_ENFORCEMENT_METABOLISM)
 
 	display_order = JOB_DISPLAY_ORDER_WARDEN
 	blacklisted_quirks = list(/datum/quirk/mute, /datum/quirk/brainproblems, /datum/quirk/nonviolent, /datum/quirk/paraplegic, /datum/quirk/blindness, /datum/quirk/monophobia)
 	threat = 2
+	
+	family_heirlooms = list(
+		/obj/item/book/manual/wiki/security_space_law
+	)
 
 /datum/job/warden/get_access()
 	var/list/L = list()

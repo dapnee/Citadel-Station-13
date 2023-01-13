@@ -1,4 +1,4 @@
-#define RANDOM_EVENT_ADMIN_INTERVENTION_TIME 10
+#define RANDOM_EVENT_ADMIN_INTERVENTION_TIME 30
 
 //this datum is used by the events controller to dictate how it selects events
 /datum/round_event_control
@@ -118,7 +118,7 @@
 	if(random)
 		log_game("Random Event triggering: [name] ([typepath])")
 	if (alert_observers)
-		deadchat_broadcast("<span class='deadsay'><b>[name]</b> has just been[random ? " randomly" : ""] triggered!</span>") //STOP ASSUMING IT'S BADMINS!
+		deadchat_broadcast(" has just been[random ? " randomly" : ""] triggered!", "<b>[name]</b>", message_type=DEADCHAT_ANNOUNCEMENT) //STOP ASSUMING IT'S BADMINS!
 	return E
 
 //Special admins setup

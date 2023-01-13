@@ -3,7 +3,7 @@
 	desc = "How someone could even fit in there is byond me."
 	icon_state = "clowncar"
 	max_integrity = 150
-	armor = list("melee" = 70, "bullet" = 40, "laser" = 40, "energy" = 0, "bomb" = 30, "bio" = 0, "rad" = 0, "fire" = 80, "acid" = 80)
+	armor = list(MELEE = 70, BULLET = 40, LASER = 40, ENERGY = 0, BOMB = 30, BIO = 0, RAD = 0, FIRE = 80, ACID = 80)
 	enter_delay = 20
 	max_occupants = 50
 	movedelay = 0.6
@@ -20,7 +20,7 @@
 	var/cannonmode = CLOWN_CANNON_INACTIVE
 	var/light_on = TRUE
 
-/obj/vehicle/sealed/car/clowncar/Initialize()
+/obj/vehicle/sealed/car/clowncar/Initialize(mapload)
 	. = ..()
 	START_PROCESSING(SSobj,src)
 
@@ -90,7 +90,7 @@
 		playsound(src, pick('sound/vehicles/clowncar_ram1.ogg', 'sound/vehicles/clowncar_ram2.ogg', 'sound/vehicles/clowncar_ram3.ogg'), 75)
 		log_combat(src, hittarget_living, "sucked up")
 		return
-	if(!istype(bumped, /turf/closed))
+	if(!istype(bumped, /turf/closed) && !istype(bumped, /obj/machinery/door/airlock/external))
 		return
 	visible_message(span_warning("[src] rams into [bumped] and crashes!"))
 	playsound(src, pick('sound/vehicles/clowncar_crash1.ogg', 'sound/vehicles/clowncar_crash2.ogg'), 75)
@@ -237,11 +237,16 @@
 	for(var/mob/busdriver as anything in return_drivers())
 		busdriver.client.give_award(/datum/award/achievement/misc/the_best_driver, busdriver)
 
+/obj/vehicle/sealed/car/clowncar/driver_move(mob/user, direction) //Prevent it from moving onto space
+	if(isspaceturf(get_step(src, direction)))
+		return FALSE
+	return ..()
+
 /obj/vehicle/sealed/car/clowncar/twitch_plays
 	key_type = null
 	explode_on_death = FALSE
 
-/obj/vehicle/sealed/car/clowncar/twitch_plays/Initialize()
+/obj/vehicle/sealed/car/clowncar/twitch_plays/Initialize(mapload)
 	. = ..()
 	AddComponent(/datum/component/twitch_plays/simple_movement)
 	GLOB.poi_list |= src

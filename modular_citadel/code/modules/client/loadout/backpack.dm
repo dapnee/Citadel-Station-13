@@ -1,7 +1,7 @@
 /datum/gear/backpack
 	category = LOADOUT_CATEGORY_BACKPACK
 	subcategory = LOADOUT_SUBCATEGORY_BACKPACK_GENERAL
-	slot = SLOT_IN_BACKPACK
+	slot = ITEM_SLOT_BACKPACK
 
 /datum/gear/backpack/plushbox
 	name = "Plushie Choice Box"
@@ -172,6 +172,26 @@
 	path = /obj/item/storage/fancy/ringbox/diamond
 	cost = 5
 
-/datum/gear/backpack/necklace//this is here because loadout doesn't support proper accessories
+/datum/gear/backpack/necklace //this is here because loadout doesn't support proper accessories
 	name = "A renameable necklace"
 	path = /obj/item/clothing/accessory/necklace
+	subcategory = LOADOUT_SUBCATEGORY_BACKPACK_ACCESSORIES
+
+/datum/gear/backpack/polymaidapron //this is ALSO here because loadout doesn't support proper accessories
+	name = "Polychromic maid apron"
+	path = /obj/item/clothing/accessory/maidapron/polychromic
+	loadout_flags = LOADOUT_CAN_NAME | LOADOUT_CAN_DESCRIPTION | LOADOUT_CAN_COLOR_POLYCHROMIC
+	loadout_initial_colors = list("#333333", "#FFFFFF")
+	subcategory = LOADOUT_SUBCATEGORY_BACKPACK_ACCESSORIES
+
+/datum/gear/backpack/pridepin //what the two comments above said
+	name = "Pride pin"
+	path = /obj/item/clothing/accessory/pride
+	loadout_flags = LOADOUT_CAN_NAME | LOADOUT_CAN_DESCRIPTION
+	subcategory = LOADOUT_SUBCATEGORY_BACKPACK_ACCESSORIES
+	cost = 0
+
+// Moved here from quirks
+/datum/gear/backpack/dyespray
+	name = "Hair dye spray"
+	path = /obj/item/dyespray
